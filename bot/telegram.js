@@ -71,6 +71,7 @@ async function run({ S, E, st, events, rd, wr, log }) {
   let ask = false;
   try {
     const ups = await tg("getUpdates", { offset: cfg.offset || 0, timeout: 0, allowed_updates: ["message"] });
+    const me = cfg.chatId ? null : await tg("getMe"); if (me) log(`Telegram bot @${me.username}: ${ups.length} new message(s)`);
     for (const u of ups) { cfg.offset = u.update_id + 1; const m = u.message; if (!m || m.chat?.type !== "private") continue;
       if (!process.env.TELEGRAM_CHAT_ID && !cfg.chatId) { cfg.chatId = m.chat.id; cfg.hello = true; }
       if (m.chat.id === (process.env.TELEGRAM_CHAT_ID ? +process.env.TELEGRAM_CHAT_ID : cfg.chatId)) ask = true; }
