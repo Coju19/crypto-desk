@@ -10,6 +10,7 @@ The signals are automated indicators, not financial advice.
   - Every run it fetches live prices from CoinGecko and does a **live check**: an open position that hit its stop-loss, target or liquidation price is closed.
   - Once a day, after the daily close (00:00 UTC, so the first run after 01:00 Berlin time), it reloads the 1-year daily charts and processes the finished day. **This is the only time new trades open**: a spot buy, a leveraged long or a short (max 5×), picked by the same rules as the page.
   - It saves everything in `data/` and commits it to this repo, so the history of every run is in the commit log.
+- **History:** CoinGecko's free API only gives 365 days, so the bot also keeps each coin's full daily history from Binance's public market data (USDT pairs, back to 2017 or the coin's listing) in `data/history/`. The Strategy lab backtest runs over all of it once a day on GitHub and saves the result in `data/lab.json`, so your phone doesn't have to crunch years of data. Signals and the 30-day simulation still use the most recent year on purpose: they should react to today's market, not 2018's.
 - **The page** (`index.html`) is published by GitHub Pages. It reads the bot's results from `data/desk.json` and loads live prices, charts, whale wallets, options and Polymarket odds in your browser. Your own trade log on the page is saved in that browser only (use "Back up data").
 - The trading rules live in one place: the bot reads its engine straight out of `index.html`, so the page and the bot always agree.
 
@@ -22,6 +23,8 @@ The signals are automated indicators, not financial advice.
 | `data/watchlist.json` | The coins the bot trades (CoinGecko ids). Edit this file on GitHub to add or remove coins. |
 | `data/settings.json` | Budget, risk per trade (%) and spot fee (%) |
 | `data/coins/*.json` | Price stats and 1-year daily chart per coin |
+| `data/history/*.json` | Full daily history per coin (Binance), used for the long backtest |
+| `data/lab.json` | The long backtest result shown in the Strategy lab |
 | `data/desk.json` | Everything above in one file, for the page |
 | `.github/workflows/bot.yml` | The schedule |
 

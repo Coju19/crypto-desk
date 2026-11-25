@@ -186,7 +186,7 @@ details.more[open]>summary{margin-bottom:10px}
   const mcp={ listTools:async()=>({servers:[{server:"host:claude_browser",authStatus:"connected",tools:[]}]}),
     callTool:async(server,tool,input)=>{
       if(tool==="preview_start"||tool==="navigate"){ lastUrl=input.url; return {content:[{type:"text",text:"(tabId local)"}],payload:"(tabId local)"}; }
-      if(tool==="get_page_text"){ let r; try{ r=await fetch(lastUrl); }catch(e){ throw {code:"upstream_error",message:"No internet connection or the data source is unreachable"}; }
+      if(tool==="get_page_text"){ let r; try{ r=await fetch(lastUrl); }catch(e){ throw {code:"upstream_error",message:"CoinGecko did not answer. Its free service allows only a few requests a minute, so try again in a minute. The prices shown are from the bot's last run"}; }
         const t=await r.text(); if(r.status===429) throw {code:"rate",message:"CoinGecko is rate-limiting requests. Wait a minute and refresh again."};
         return {content:[{type:"text",text:"---\n"+t}],payload:"---\n"+t}; }
       throw {code:"bad_request",message:"unknown tool"}; } };
@@ -412,7 +412,7 @@ async function refreshLive(onlyIds){
         high24:m.high_24h,low24:m.low_24h,ch24:m.price_change_percentage_24h_in_currency,ch7:m.price_change_percentage_7d_in_currency,
         ch30:m.price_change_percentage_30d_in_currency,circ:m.circulating_supply,total:m.total_supply,max:m.max_supply,ath:m.ath,athDate:m.ath_date,
         updatedAt:now,source:"CoinGecko",t0:old.t0,closes:old.closes,vols:old.vols||null,chartAt:old.chartAt||null};
-      const stale=!old.closes||!old.chartAt||(Date.now()-new Date(old.chartAt).getTime())>6*3600e3;
+      const stale=!old.closes||!old.chartAt||(Date.now()-new Date(old.chartAt).getTime())>(window.__deskServer?30:6)*3600e3;
       if(stale){
         S.msg=`Fetching 1-year chart for ${m.name}…`; render(); await sleep(1500);
         const ch=await browserGet(`${CG}/coins/${encodeURIComponent(m.id)}/market_chart?vs_currency=usd&days=365&interval=daily`);
@@ -531,6 +531,7 @@ function statsOf(st){
 }
 const LAB={key:"",bt:null,hold:null,score:null};
 function labData(){
+  const SL=window.__deskServer?.lab; if(SL&&SL.bt){ Object.assign(LAB,SL); return LAB; }
   const key=S.watch.join(",")+"|"+S.watch.map(id=>S.coins[id]?.updatedAt).join(",")+"|"+S.settings.riskPct+"|"+S.settings.feePct+"|"+S.settings.budget;
   if(LAB.key===key) return LAB; LAB.key=key;
   const ser=seriesFor(S.watch), ids=Object.keys(ser); if(!ids.length){ LAB.bt=null; return LAB; }
@@ -636,7 +637,7 @@ function renderLab(){
         ${equitySVG([{pts:L.hold,color:"var(--sma200)",dash:"5 4",w:1.5},{pts:L.bt.equity,color:"var(--accent)"}],budget)}
         <div class="legend"><span><i style="background:var(--accent)"></i>Bot with fake ${usd(budget,0)}</span><span><i style="background:var(--sma200)"></i>Buy and hold the watchlist, equal split</span></div>
         ${byTypeHTML(b)}
-        <div class="small muted">Replays every day of the past year using only the prices known on that day. It trades at daily closing prices, so real fills, stops and liquidations can be worse: a wick during the day can liquidate a leveraged trade that looks safe at the close. Futures costs are estimates (0.1% fee per side, 0.03% funding per day, 1% liquidation fee); real funding changes every 8 hours. One year of one market mood is a small sample.</div>
+        <div class="small muted">Replays every day ${L.btFrom?"since "+L.btFrom:"of the past year"} using only the prices known on that day. It trades at daily closing prices, so real fills, stops and liquidations can be worse: a wick during the day can liquidate a leveraged trade that looks safe at the close. Futures costs are estimates (0.1% fee per side, 0.03% funding per day, 1% liquidation fee); real funding changes every 8 hours. One year of one market mood is a small sample.</div>
         <details><summary class="small">All ${L.bt.trades.length} backtest trades</summary><div class="tbl"><table>${TRADE_HEAD}<tbody>${tradeRows(L.bt.trades)}</tbody></table></div></details>
       </div>
       <div style="display:grid;gap:12px;min-width:0"><h3>Paper bot · live, fake money</h3>${paperHTML}</div>
@@ -645,7 +646,7 @@ function renderLab(){
       <div class="tbl"><table><thead><tr><th>Rule</th><th class="r">Right after 7 days</th><th class="r">When it said up: avg 7-day move</th><th class="r">When it said down: avg 7-day move</th><th class="r">Calls</th></tr></thead><tbody>
       ${L.score.map(s=>`<tr><td>${esc(RULENAME[s.k])}</td><td class="r num">${s.acc==null?"–":`<span class="${s.acc>=55?"up":s.acc<45?"down":""}">${s.acc.toFixed(0)}%</span>`}</td><td class="r num">${s.pos?pct(s.posRet/s.pos*100,2):"–"}</td><td class="r num">${s.neg?pct(s.negRet/s.neg*100,2):"–"}</td><td class="r num">${s.pos+s.neg}</td></tr>`).join("")}
       </tbody></table></div>
-      <div class="small muted">Each day of the past year, each rule said up (+1) or down (−1). This counts how often the price really moved that way over the next 7 days; 50% is a coin flip. ${best&&worst?`Over this year, “${esc(RULENAME[best.k])}” did best and “${esc(RULENAME[worst.k])}” did worst.`:""} Once the paper bot has a few weeks of its own trades, these numbers can be used to give the better rules more weight.</div>
+      <div class="small muted">Each day ${L.btFrom?"since "+L.btFrom:"of the past year"}, each rule said up (+1) or down (−1). This counts how often the price really moved that way over the next 7 days; 50% is a coin flip. ${best&&worst?`Over this year, “${esc(RULENAME[best.k])}” did best and “${esc(RULENAME[worst.k])}” did worst.`:""} Once the paper bot has a few weeks of its own trades, these numbers can be used to give the better rules more weight.</div>
     </div>`;
   const ps0=$("pstart"); if(ps0) ps0.onclick=paperStart;
   el.querySelectorAll("[data-preset]").forEach(btn=>btn.onclick=async()=>{ const v=btn.dataset.preset; if(v==="ask") S.confirmReset=true; else if(v==="no") S.confirmReset=false; else { S.confirmReset=false; await paperStart(); } render(); });
@@ -764,6 +765,13 @@ function renderBanner(){
   $("banner").innerHTML=h; const d=$("dismiss"); if(d) d.onclick=()=>{S.err="";render();};
 }
 function renderStrip(B){
+  const P=S.paper; if(window.__deskServer&&P){ const v=P.live?.v??P.cash, pl=v-P.budget, cl=P.trades.filter(t=>t.pnl!=null), w=cl.filter(t=>t.pnl>0).length;
+    $("strip").innerHTML=`
+    <div><span class="label">Paper bot (fake ${usd(P.budget,0)})</span><span class="v">${usd(v,2)}</span><span class="small">${pct(pl/P.budget*100,2)} <span class="muted">since ${esc(P.startDate||"start")}</span></span></div>
+    <div><span class="label">Profit / loss</span><span class="v ${pl>=0?"up":"down"}">${pl>=0?"+":""}${usd(pl,2)}</span><span class="small muted">fake money</span></div>
+    <div><span class="label">Cash</span><span class="v">${usd(P.cash,2)}</span><span class="small muted">not in trades</span></div>
+    <div><span class="label">Open trades</span><span class="v">${Object.keys(P.pos||{}).length}</span><span class="small muted">${esc(Object.keys(P.pos||{}).map(id=>(S.coins[id]?.symbol||id).toUpperCase()).join(", ")||"none")}</span></div>
+    <div><span class="label">Closed trades</span><span class="v">${cl.length}</span><span class="small muted">${w} won · bot checked ${ago(P.live?.at||P.updatedAt)}</span></div>`; return; }
   $("strip").innerHTML=`
     <div><span class="label">Portfolio value</span><span class="v">${usd(B.total,2)}</span><span class="small">${pct(B.pnlPct,2)} <span class="muted">since start</span></span></div>
     <div><span class="label">Profit / loss</span><span class="v ${B.pnl>=0?"up":"down"}">${B.pnl>=0?"+":""}${usd(B.pnl,2)}</span><span class="small muted">realized ${usd(B.realized,2)}</span></div>

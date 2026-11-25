@@ -3,6 +3,9 @@ name: Paper bot
 on:
   schedule:
     - cron: "7,37 * * * *"   # every 30 minutes (GitHub can start scheduled runs a few minutes late)
+  push:                       # also run right after the bot or page code changes
+    branches: [main]
+    paths: ["bot/**", "index.html", ".github/workflows/**", "data/watchlist.json", "data/settings.json"]
   workflow_dispatch:          # "Run workflow" button on the Actions tab
     inputs:
       force_daily:
