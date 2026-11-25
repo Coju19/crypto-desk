@@ -15,8 +15,8 @@
  "lastDate": "2026-11-24",
  "liqs": 0,
  "live": {
-  "at": "2026-11-25T07:20:53.000Z",
-  "v": 102.4841
+  "at": "2026-11-25T07:48:19.312Z",
+  "v": 102.9242
  },
  "pos": {
   "chainlink": {
@@ -24,7 +24,7 @@
    "date": "2026-11-24",
    "dir": -1,
    "entry": 9.008,
-   "last": 8.74,
+   "last": 8.71,
    "lev": 5,
    "liq": 10.584399999999999,
    "margin": 6.9924652914190615,
@@ -44,7 +44,7 @@
    "date": "2026-11-24",
    "dir": -1,
    "entry": 17.5,
-   "last": 17.28,
+   "last": 17.21,
    "lev": 5,
    "liq": 20.5625,
    "margin": 7.998413629818454,
@@ -64,7 +64,7 @@
    "date": "2026-11-24",
    "dir": -1,
    "entry": 4.843,
-   "last": 4.59,
+   "last": 4.55,
    "lev": 4.957406817331485,
    "liq": 5.698847043813005,
    "margin": 4,
@@ -100,7 +100,7 @@
    "target": 3.8660779561869947,
    "type": "short",
    "usd": 19.82962726932594,
-   "why": "Strong sell (score -3, RSI 35), so a short at 5.0\u00d7 that gains if the price keeps falling. $4.00 of margin controls $19.83. Stop $5.33, target $3.87, liquidation $5.70. Rules against: Long-term trend (price vs 200-day avg), Medium trend (20 vs 50-day avg), Price vs 50-day avg."
+   "why": "Strong sell (score -3, RSI 35), so a short at 5.0× that gains if the price keeps falling. $4.00 of margin controls $19.83. Stop $5.33, target $3.87, liquidation $5.70. Rules against: Long-term trend (price vs 200-day avg), Medium trend (20 vs 50-day avg), Price vs 50-day avg."
   },
   {
    "coin": "compound-governance-token",
@@ -120,7 +120,7 @@
    "target": 15.75,
    "type": "short",
    "usd": 39.99206814909227,
-   "why": "Strong sell (score -3, RSI 35), so a short at 5.0\u00d7 that gains if the price keeps falling. $8.00 of margin controls $39.99. Stop $18.38, target $15.75, liquidation $20.56. Rules against: Long-term trend (price vs 200-day avg), Medium trend (20 vs 50-day avg), Price vs 50-day avg."
+   "why": "Strong sell (score -3, RSI 35), so a short at 5.0× that gains if the price keeps falling. $8.00 of margin controls $39.99. Stop $18.38, target $15.75, liquidation $20.56. Rules against: Long-term trend (price vs 200-day avg), Medium trend (20 vs 50-day avg), Price vs 50-day avg."
   },
   {
    "coin": "chainlink",
@@ -140,8 +140,8 @@
    "target": 7.9780214861016825,
    "type": "short",
    "usd": 34.96232645709531,
-   "why": "Strong sell (score -3, RSI 37), so a short at 5.0\u00d7 that gains if the price keeps falling. $6.99 of margin controls $34.96. Stop $9.52, target $7.98, liquidation $10.58. Rules against: Long-term trend (price vs 200-day avg), Medium trend (20 vs 50-day avg), Price vs 50-day avg."
+   "why": "Strong sell (score -3, RSI 37), so a short at 5.0× that gains if the price keeps falling. $6.99 of margin controls $34.96. Stop $9.52, target $7.98, liquidation $10.58. Rules against: Long-term trend (price vs 200-day avg), Medium trend (20 vs 50-day avg), Price vs 50-day avg."
   }
  ],
- "updatedAt": "2026-11-25T07:27:53.441Z"
+ "updatedAt": "2026-11-25T07:48:19.312Z"
 }
