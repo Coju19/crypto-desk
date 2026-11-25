@@ -20,7 +20,7 @@ if (!pageScript) throw new Error("Could not find the Crypto Desk engine in index
 const engine = pageScript.split("/* ---------- rendering")[0]
   .replace("const S = ", "globalThis.S = ").replace("const $ =", "globalThis.$ =");
 globalThis.window = {}; // the page checks window.__deskServer; empty here
-(0, eval)(engine + "\n;globalThis.E={simulate,liveCheck,yesterday,analyze,posValue,labData,LAB};");
+(0, eval)(engine + "\n;globalThis.E={simulate,liveCheck,yesterday,analyze,posValue,pickTrade,labData,LAB};");
 
 // ---- CoinGecko ----
 const CG = "https://api.coingecko.com/api/v3";
@@ -143,10 +143,15 @@ function longSeries(c, h) {
   const closed = E.liveCheck(st, prices, now);
   st.updatedAt = now;
 
+  // Telegram (only when the TELEGRAM_BOT_TOKEN secret is set)
+  let tgChanged = false;
+  try { tgChanged = await require("./telegram").run({ S, E, st, events: [...newTrades, ...closed], rd, wr, log: m => { console.log(m); } }); }
+  catch (e) { console.log("Telegram failed: " + e.message); }
+
   // only save (= commit, = page rebuild) when something happened, or every ~30 minutes to keep the page's numbers fresh
   let prev = null; try { prev = rd("status.json"); } catch {}
   const heartbeat = !prev || Date.now() - new Date(prev.lastRun).getTime() > 28 * 60e3;
-  if (!(closed.length || newTrades.length || dailyRan || needDaily || histMissing || errors.length || heartbeat || process.env.FORCE_DAILY === "1")) {
+  if (!(tgChanged || closed.length || newTrades.length || dailyRan || needDaily || histMissing || errors.length || heartbeat || process.env.FORCE_DAILY === "1")) {
     console.log(JSON.stringify({ at: now, saved: false, equity: st.live.v, open: Object.keys(st.pos) })); return;
   }
 

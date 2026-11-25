@@ -14,6 +14,16 @@ The signals are automated indicators, not financial advice.
 - **The page** (`index.html`) is published by GitHub Pages. It reads the bot's results from `data/desk.json` and loads live prices, charts, whale wallets, options and Polymarket odds in your browser. Your own trade log on the page is saved in that browser only (use "Back up data").
 - The trading rules live in one place: the bot reads its engine straight out of `index.html`, so the page and the bot always agree.
 
+## Telegram alerts (optional)
+
+The bot can message you on Telegram: when it opens or closes a trade, a short summary every morning (first run after 08:00 Berlin time), and a summary whenever you send it `/status` (answered on the next run, within ~5-10 minutes).
+
+1. In Telegram, talk to **@BotFather** → `/newbot` → copy the token it gives you.
+2. Open your new bot and press **Start**.
+3. Repo Settings → Secrets and variables → Actions → New repository secret: `TELEGRAM_BOT_TOKEN` = the token.
+
+The bot remembers the first chat that pressed Start (its numeric id is saved in `data/telegram.json`; it is useless without the token) and ignores everyone else. To pin it to a chat yourself, add a `TELEGRAM_CHAT_ID` secret. Never put the token in a file: this repo is public.
+
 ## Files
 
 | File | What it is |
