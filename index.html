@@ -1,0 +1,1053 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;padding-top:env(safe-area-inset-top);padding-bottom:env(safe-area-inset-bottom)}body{margin:0;font:14px system-ui,sans-serif}img{max-width:100%}[hidden]{display:none!important}</style></head><body>
+<title>Crypto Desk</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: summary strip on top, watchlist rail + coin detail side by side, $100 tracker below. Stacks to one column on phones. */
+:root{
+  --bg:#f3f5f9; --panel:#ffffff; --panel-2:#eef1f7; --line:#dde2ec; --fg:#141a2b; --muted:#5c6680;
+  --accent:#3049c9; --accent-soft:#e4e9ff;
+  --buy:#17825a; --buy-soft:#e1f4ea; --sell:#c0392f; --sell-soft:#fbe7e5; --hold:#a66a0a; --hold-soft:#fbefd9;
+  --sma20:#3049c9; --sma50:#c46f00; --sma200:#8a93a8;
+  --f-display:"Space Grotesk",system-ui,sans-serif; --f-body:"Inter",system-ui,sans-serif; --f-mono:"JetBrains Mono",ui-monospace,Menlo,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0f1320; --panel:#161b2b; --panel-2:#1d2336; --line:#2a3147; --fg:#e8ecf6; --muted:#9aa3bb;
+  --accent:#8fa2ff; --accent-soft:#232c52;
+  --buy:#4cc38a; --buy-soft:#143326; --sell:#ff7b72; --sell-soft:#3a1d1d; --hold:#e3b341; --hold-soft:#3a2e12;
+  --sma20:#8fa2ff; --sma50:#f0a04b; --sma200:#6f7891; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0f1320; --panel:#161b2b; --panel-2:#1d2336; --line:#2a3147; --fg:#e8ecf6; --muted:#9aa3bb;
+  --accent:#8fa2ff; --accent-soft:#232c52;
+  --buy:#4cc38a; --buy-soft:#143326; --sell:#ff7b72; --sell-soft:#3a1d1d; --hold:#e3b341; --hold-soft:#3a2e12;
+  --sma20:#8fa2ff; --sma50:#f0a04b; --sma200:#6f7891; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--fg);font-family:var(--f-body);font-size:14px;line-height:1.45}
+.wrap{max-width:1240px;margin:0 auto;padding-block:20px 48px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:grid;gap:16px}
+h1,h2,h3{font-family:var(--f-display);margin:0;text-wrap:balance;letter-spacing:-.01em}
+h1{font-size:22px} h2{font-size:17px} h3{font-size:14px}
+.num{font-family:var(--f-mono);font-variant-numeric:tabular-nums}
+.muted{color:var(--muted)} .small{font-size:12px}
+.label{font-size:11px;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);font-weight:600}
+.up{color:var(--buy)} .down{color:var(--sell)}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:12px}
+button,input,select{font:inherit;color:inherit}
+button{cursor:pointer;border:1px solid var(--line);background:var(--panel);border-radius:8px;padding:7px 12px;font-weight:500}
+button:hover{border-color:var(--accent)}
+button.primary{background:var(--accent);border-color:var(--accent);color:var(--panel)}
+button:disabled{opacity:.55;cursor:default}
+button:focus-visible,input:focus-visible,select:focus-visible,.row:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+input,select{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:7px 9px;min-width:0;width:100%}
+.top{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px}
+.top .brand{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+.status{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.dot{width:8px;height:8px;border-radius:50%;display:inline-block;background:var(--muted)}
+.dot.live{background:var(--buy)}
+.strip{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:1px;background:var(--line);border-radius:12px;overflow:hidden;border:1px solid var(--line)}
+.strip>div{background:var(--panel);padding:12px 14px;display:grid;gap:2px;min-width:0}
+.strip .v{font-family:var(--f-mono);font-size:19px;font-variant-numeric:tabular-nums}
+.main{display:grid;grid-template-columns:300px minmax(0,1fr);gap:16px;align-items:start}
+.rail{padding:8px;display:grid;gap:4px}
+.rail-head{display:flex;justify-content:space-between;align-items:center;padding:6px 8px}
+.row{display:grid;grid-template-columns:minmax(0,1fr) 64px auto;gap:8px;align-items:center;padding:9px 8px;border-radius:9px;cursor:pointer;border:1px solid transparent}
+.row:hover{background:var(--panel-2)}
+.row.sel{background:var(--accent-soft);border-color:var(--accent)}
+.row .nm{min-width:0}
+.row .nm b{font-family:var(--f-display);font-weight:600}
+.row .px{display:flex;gap:6px;font-size:12px}
+.row .x{opacity:0;border:none;background:none;padding:2px 6px;color:var(--muted)}
+.row:hover .x,.row.sel .x{opacity:1}
+.chip{display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:600;padding:2px 8px;border-radius:999px;letter-spacing:.03em;white-space:nowrap}
+.chip.BUY{background:var(--buy-soft);color:var(--buy)} .chip.SELL{background:var(--sell-soft);color:var(--sell)} .chip.HOLD{background:var(--hold-soft);color:var(--hold)}
+.add{border-top:1px solid var(--line);margin-top:6px;padding:10px 8px 4px;display:grid;gap:8px}
+.add form{display:flex;gap:6px}
+.quick{display:flex;flex-wrap:wrap;gap:5px}
+.quick button{padding:3px 9px;font-size:12px;border-radius:999px}
+.results{display:grid;gap:2px}
+.results button{text-align:left;border:none;padding:6px 8px;background:var(--panel-2)}
+.detail{padding:18px;display:grid;gap:18px;min-width:0}
+.dhead{display:flex;flex-wrap:wrap;justify-content:space-between;gap:12px;align-items:flex-end}
+.price{font-family:var(--f-mono);font-size:32px;font-variant-numeric:tabular-nums;line-height:1.1}
+.ranges{display:flex;gap:4px}
+.ranges button{padding:4px 10px;font-size:12px}
+.ranges button.on{background:var(--fg);color:var(--panel);border-color:var(--fg)}
+.chart{position:relative}
+.chart svg{display:block;width:100%;height:auto;overflow:visible}
+.legend{display:flex;flex-wrap:wrap;gap:14px;font-size:12px;color:var(--muted)}
+.legend i{display:inline-block;width:14px;height:2px;vertical-align:middle;margin-right:5px}
+.tip{position:absolute;pointer-events:none;background:var(--fg);color:var(--panel);font-size:12px;padding:6px 8px;border-radius:6px;white-space:nowrap;font-family:var(--f-mono);transform:translate(-50%,-110%)}
+.signal{display:grid;grid-template-columns:minmax(0,220px) minmax(0,1fr);gap:18px;padding:16px;border-radius:12px;border:1px solid var(--line);background:var(--panel-2)}
+.sigbig{display:grid;gap:8px;align-content:start}
+.sigbig .word{font-family:var(--f-display);font-size:26px;font-weight:700}
+.sigbig .word.BUY{color:var(--buy)} .sigbig .word.SELL{color:var(--sell)} .sigbig .word.HOLD{color:var(--hold)}
+.meter{display:grid;grid-template-columns:repeat(13,1fr);gap:2px}
+.meter span{height:8px;border-radius:2px;background:var(--line)}
+.rules{display:grid;gap:8px;margin:0;padding:0;list-style:none}
+.rules li{display:grid;grid-template-columns:22px minmax(0,1fr);gap:8px;align-items:start}
+.rules .m{font-family:var(--f-mono);font-weight:600;text-align:center;border-radius:5px;font-size:12px;padding:1px 0}
+.m.p{background:var(--buy-soft);color:var(--buy)} .m.n{background:var(--sell-soft);color:var(--sell)} .m.z{background:var(--line);color:var(--muted)}
+.note{font-size:12px;color:var(--muted);border-left:2px solid var(--line);padding-left:10px}
+.stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px 18px}
+.stats>div{display:grid;gap:2px;min-width:0}
+.stats .v{font-family:var(--f-mono);font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
+.plan{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;padding:14px;border:1px dashed var(--line);border-radius:12px}
+.plan>div{display:grid;gap:2px;min-width:0}
+.plan .v{font-family:var(--f-mono);font-size:16px}
+.plan .wide{grid-column:1/-1}
+.track{padding:18px;display:grid;gap:16px}
+.track-grid{display:grid;grid-template-columns:minmax(0,330px) minmax(0,1fr);gap:18px;align-items:start}
+.tform{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.tform .full{grid-column:1/-1}
+.tform label{display:grid;gap:4px;font-size:12px;color:var(--muted)}
+.seg{display:grid;grid-template-columns:1fr 1fr;border:1px solid var(--line);border-radius:8px;overflow:hidden}
+.seg button{border:none;border-radius:0}
+.seg button.on.buy{background:var(--buy-soft);color:var(--buy);font-weight:600}
+.seg button.on.sell{background:var(--sell-soft);color:var(--sell);font-weight:600}
+.tbl{overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-size:13px}
+th{text-align:left;font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);font-weight:600;padding:6px 8px;border-bottom:1px solid var(--line);white-space:nowrap}
+td{padding:8px;border-bottom:1px solid var(--line);white-space:nowrap}
+td.r,th.r{text-align:right}
+.empty{padding:22px;text-align:center;color:var(--muted);border:1px dashed var(--line);border-radius:10px}
+.banner{padding:10px 14px;border-radius:10px;background:var(--hold-soft);color:var(--fg);font-size:13px}
+.banner.err{background:var(--sell-soft)}
+.settings{display:flex;flex-wrap:wrap;gap:12px;align-items:end}
+.settings label{display:grid;gap:4px;font-size:12px;color:var(--muted);width:110px}
+.soon{padding:16px 18px;display:grid;gap:6px}
+.foot{font-size:12px;color:var(--muted);max-width:80ch}
+.linkbtn{border:none;background:none;padding:0;color:var(--accent);text-decoration:underline}
+@media (max-width:900px){
+  .main,.track-grid{grid-template-columns:minmax(0,1fr)}
+  .strip{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .strip>div:first-child{grid-column:1/-1}
+  .stats,.plan{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .signal{grid-template-columns:minmax(0,1fr)}
+}
+.tabs{display:flex;gap:4px;padding:4px;border:1px solid var(--line);border-radius:12px;background:var(--panel);width:max-content;max-width:100%;overflow-x:auto}
+.tabs button{border:0;background:transparent;padding:8px 16px;border-radius:9px;font-weight:600;color:var(--muted);cursor:pointer;white-space:nowrap}
+.tabs button[aria-selected="true"]{background:var(--accent);color:#fff}
+#app[data-tab="today"] [data-tab]:not([data-tab~="today"]),#app[data-tab="coins"] [data-tab]:not([data-tab~="coins"]),#app[data-tab="bot"] [data-tab]:not([data-tab~="bot"]){display:none!important}
+details.more>summary{cursor:pointer;font-weight:600;padding:10px 0;list-style-position:inside}
+details.more[open]>summary{margin-bottom:10px}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+
+<div class="wrap" id="app">
+  <header class="top">
+    <div class="brand"><h1>Crypto Desk</h1><span class="muted small">Watchlist, signals and the $100 tracker</span></div>
+    <div class="status" id="status"><span class="dot"></span><span class="small muted">Loading saved data…</span></div>
+  </header>
+  <nav class="tabs" id="tabs" role="tablist" aria-label="Sections">
+    <button role="tab" data-go="today">Today</button><button role="tab" data-go="coins">Coins</button><button role="tab" data-go="bot">Bot and $100</button>
+  </nav>
+  <div id="banner"></div>
+  <section class="strip" id="strip" data-tab="today"></section>
+  <section class="panel track" id="ideas" data-tab="today" hidden></section>
+  <section class="panel track" id="mood" data-tab="today" hidden></section>
+  <section class="main" data-tab="coins">
+    <aside class="panel rail" id="rail"><div class="empty">Loading your watchlist…</div></aside>
+    <article class="panel detail" id="detail"><div class="empty">Pick a coin to see its analysis.</div></article>
+  </section>
+  <section class="panel track" id="track" data-tab="bot"></section>
+  <section class="panel track" id="lab" data-tab="bot"></section>
+  <p class="foot">Signals on this page are automated indicators computed from past prices with fixed rules. They are not financial advice and cannot predict the market. Crypto can lose most of its value quickly; only put in money you can afford to lose. Prices from CoinGecko, in US dollars.</p>
+</div>
+
+<script>
+/* Standalone mode: saves everything in this browser (localStorage) and fetches public APIs directly. */
+(function(){
+  const KEY="crypto-desk-v1"; let store={};
+  try{ store=JSON.parse(localStorage.getItem(KEY)||"{}"); }catch(e){ store={}; }
+  /* GitHub version: the paper bot runs on GitHub Actions and saves its results in data/desk.json next to this page.
+     The bot's state, watchlist and settings always come from there; this page only shows them. */
+  let server=null;
+  try{ const x=new XMLHttpRequest(); x.open("GET","data/desk.json?t="+Date.now(),false); x.send(); if(x.status===200) server=JSON.parse(x.responseText); }catch(e){ console.warn("Could not load the bot's results",e); }
+  const SERVER_KEYS=["paper/state","config/watchlist","config/settings"];
+  if(server){
+    store["paper/state"]=server.paper; store["config/watchlist"]=server.watchlist; store["config/settings"]=server.settings;
+    for(const [id,c] of Object.entries(server.coins||{})){ const cur=store["coins/"+id]; if(!cur||!cur.updatedAt||cur.updatedAt<=c.updatedAt||!cur.closes) store["coins/"+id]=c; }
+    for(const k of Object.keys(store)) if(k.startsWith("coins/")&&!server.watchlist.ids.includes(k.slice(6))) delete store[k];
+  }
+  window.__deskServer=server;
+  if(!store["config/watchlist"]) store["config/watchlist"]={ids:["bitcoin","ethereum","aave"]};
+  if(!store["config/settings"]) store["config/settings"]={budget:100,riskPct:2,feePct:1};
+  const subs=[]; const clone=v=>v==null?v:JSON.parse(JSON.stringify(v));
+  const save=()=>{ try{ localStorage.setItem(KEY,JSON.stringify(store)); }catch(e){ console.warn("Could not save",e); } };
+  const docSnap=(p)=>({id:p.split("/").pop(),exists:p in store,data:()=>clone(store[p]),metadata:{}});
+  const colSnap=(c)=>{ const docs=Object.keys(store).filter(k=>k.startsWith(c+"/")&&k.split("/").length===c.split("/").length+1).map(docSnap); return {docs,size:docs.length,empty:!docs.length,docChanges:()=>[],metadata:{}}; };
+  const notify=()=>{ save(); subs.forEach(s=>setTimeout(()=>s.fn(s.kind==="doc"?docSnap(s.p):colSnap(s.p)),0)); };
+  const ro=p=>server&&SERVER_KEYS.includes(p);
+  const docRef=p=>({id:p.split("/").pop(),path:p,get:async()=>docSnap(p),set:async d=>{if(ro(p)) return; store[p]=clone(d);notify();},update:async d=>{if(ro(p)) return; store[p]={...(store[p]||{}),...clone(d)};notify();},delete:async()=>{if(ro(p)) return; delete store[p];notify();},
+    onSnapshot:(fn)=>{ const s={kind:"doc",p,fn}; subs.push(s); setTimeout(()=>fn(docSnap(p)),0); return ()=>subs.splice(subs.indexOf(s),1); }});
+  const colRef=c=>({path:c,doc:id=>docRef(c+"/"+(id||Math.random().toString(36).slice(2,12))),add:async d=>{ const r=docRef(c+"/"+Date.now().toString(36)+Math.random().toString(36).slice(2,6)); await r.set(d); return r; },
+    get:async()=>colSnap(c),onSnapshot:(fn)=>{ const s={kind:"col",p:c,fn}; subs.push(s); setTimeout(()=>fn(colSnap(c)),0); return ()=>subs.splice(subs.indexOf(s),1); }});
+  const db={doc:docRef,collection:colRef};
+  let lastUrl=null;
+  const mcp={ listTools:async()=>({servers:[{server:"host:claude_browser",authStatus:"connected",tools:[]}]}),
+    callTool:async(server,tool,input)=>{
+      if(tool==="preview_start"||tool==="navigate"){ lastUrl=input.url; return {content:[{type:"text",text:"(tabId local)"}],payload:"(tabId local)"}; }
+      if(tool==="get_page_text"){ let r; try{ r=await fetch(lastUrl); }catch(e){ throw {code:"upstream_error",message:"No internet connection or the data source is unreachable"}; }
+        const t=await r.text(); if(r.status===429) throw {code:"rate",message:"CoinGecko is rate-limiting requests. Wait a minute and refresh again."};
+        return {content:[{type:"text",text:"---\n"+t}],payload:"---\n"+t}; }
+      throw {code:"bad_request",message:"unknown tool"}; } };
+  window.claude={use:async n=>n==="db"?db:n==="mcp"?mcp:null};
+  window.__desk={store,save,notify,db};
+})();
+
+</script>
+<script>
+const HOST = "host:claude_browser";
+const CG = "https://api.coingecko.com/api/v3";
+const QUICK = [["solana","SOL"],["ripple","XRP"],["chainlink","LINK"],["dogecoin","DOGE"],["cardano","ADA"],["uniswap","UNI"],["avalanche-2","AVAX"],["litecoin","LTC"]];
+const S = { coins:{}, watch:[], watchLoaded:false, trades:[], settings:{budget:100,riskPct:2,feePct:1}, sel:null, range:90,
+  db:null, dbState:"loading", mcp:null, host:false, tabId:null, busy:false, msg:"", err:"", auto:null,
+  holders:{}, side:"buy", search:[], searching:false, confirmDel:null, form:{} };
+
+/* ---------- helpers ---------- */
+const $ = id => document.getElementById(id);
+const esc = v => String(v ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+const today = () => new Date().toISOString().slice(0,10);
+function usd(v, d){ if(v==null||isNaN(v)) return "–"; const a=Math.abs(v); const dec = d ?? (a>=1000?0:a>=1?2:a>=0.01?4:6);
+  return (v<0?"-$":"$")+a.toLocaleString("en-US",{minimumFractionDigits:dec,maximumFractionDigits:dec}); }
+function big(v){ if(v==null||isNaN(v)) return "–"; const a=Math.abs(v);
+  if(a>=1e12) return "$"+(v/1e12).toFixed(2)+"T"; if(a>=1e9) return "$"+(v/1e9).toFixed(2)+"B"; if(a>=1e6) return "$"+(v/1e6).toFixed(1)+"M"; return usd(v,0); }
+function qty(v){ if(v==null||isNaN(v)) return "–"; const a=Math.abs(v); return v.toLocaleString("en-US",{maximumFractionDigits:a>=1000?0:a>=1?4:8}); }
+function supply(v){ if(v==null) return "no cap"; if(v>=1e9) return (v/1e9).toFixed(2)+"B"; if(v>=1e6) return (v/1e6).toFixed(2)+"M"; return Math.round(v).toLocaleString("en-US"); }
+function pct(v, d=1){ if(v==null||isNaN(v)) return '<span class="muted">–</span>'; return `<span class="${v>=0?"up":"down"}">${v>=0?"+":""}${v.toFixed(d)}%</span>`; }
+function ago(iso){ if(!iso) return "never"; const s=(Date.now()-new Date(iso).getTime())/1000; if(s<90) return "just now"; if(s<3600) return Math.round(s/60)+" min ago"; if(s<86400) return Math.round(s/3600)+" h ago"; return Math.round(s/86400)+" days ago"; }
+function fmtDate(sec){ return new Date(sec*1000).toLocaleDateString("en-GB",{day:"numeric",month:"short",year:"2-digit"}); }
+function addDays(dateStr, n){ const d=new Date(dateStr+"T00:00:00Z"); d.setUTCDate(d.getUTCDate()+n); return d.toISOString().slice(0,10); }
+function daysBetween(a,b){ return Math.floor((new Date(b+"T00:00:00Z")-new Date(a+"T00:00:00Z"))/864e5); }
+
+/* ---------- indicators ---------- */
+function sma(a,n){ const o=Array(a.length).fill(null); let s=0; for(let i=0;i<a.length;i++){ s+=a[i]; if(i>=n) s-=a[i-n]; if(i>=n-1) o[i]=s/n; } return o; }
+function ema(a,n){ const o=Array(a.length).fill(null), k=2/(n+1); let e=null, start=a.findIndex(v=>v!=null); if(start<0) return o;
+  for(let i=start;i<a.length;i++){ if(i<start+n-1) continue; if(e==null){ let s=0; for(let j=i-n+1;j<=i;j++) s+=a[j]; e=s/n; } else e=a[i]*k+e*(1-k); o[i]=e; } return o; }
+function rsi(a,n=14){ const o=Array(a.length).fill(null); if(a.length<=n) return o; let g=0,l=0;
+  for(let i=1;i<=n;i++){ const d=a[i]-a[i-1]; if(d>0) g+=d; else l-=d; } g/=n; l/=n; o[n]=l===0?100:100-100/(1+g/l);
+  for(let i=n+1;i<a.length;i++){ const d=a[i]-a[i-1]; g=(g*(n-1)+Math.max(d,0))/n; l=(l*(n-1)+Math.max(-d,0))/n; o[i]=l===0?100:100-100/(1+g/l); } return o; }
+/* heavy-volume days: 24h volume above 1.8x the average of the 30 days before it */
+function bigDays(a,vols,lookback){
+  if(!vols||vols.length<a.length-2||a.length<45) return null; const v=vols.slice(-a.length), out=[], n=a.length;
+  for(let i=Math.max(31,n-lookback);i<n;i++){ let s=0; for(let j=i-30;j<i;j++) s+=v[j]; const avg=s/30; if(avg>0&&v[i]>1.8*avg) out.push({i,x:v[i]/avg,ret:a[i]/a[i-1]-1,vol:v[i]}); }
+  return out;
+}
+function analyze(c){
+  const a=(c.closes||[]).slice(); if(c.price) a[a.length-1]=c.price;
+  const n=a.length; if(n<60) return null;
+  const s20=sma(a,20), s50=sma(a,50), s200=sma(a,200), r=rsi(a,14);
+  const e12=ema(a,12), e26=ema(a,26); const macd=a.map((_,i)=>e12[i]!=null&&e26[i]!=null?e12[i]-e26[i]:null);
+  const sig=ema(macd,9); const hist=macd.map((v,i)=>v!=null&&sig[i]!=null?v-sig[i]:null);
+  const p=a[n-1], L=i=>i[n-1], rets=[]; for(let i=1;i<n;i++) rets.push(a[i]/a[i-1]-1);
+  const last30=rets.slice(-30), mean=last30.reduce((x,y)=>x+y,0)/last30.length;
+  const vol=Math.sqrt(last30.reduce((x,y)=>x+(y-mean)**2,0)/last30.length)*Math.sqrt(365)*100;
+  const move14=rets.slice(-14).reduce((x,y)=>x+Math.abs(y),0)/14;
+  const yr=a.slice(-366), hi=Math.max(...yr), lo=Math.min(...yr);
+  const rules=[];
+  if(L(s200)!=null) rules.push(p>L(s200)
+    ? {k:"t200",m:1,t:`Price is above its 200-day average (${usd(L(s200))}). The long-term trend is up.`}
+    : {k:"t200",m:-1,t:`Price is below its 200-day average (${usd(L(s200))}). The long-term trend is down.`});
+  rules.push(L(s20)>L(s50)
+    ? {k:"x2050",m:1,t:`The 20-day average is above the 50-day average. The medium-term trend is pointing up.`}
+    : {k:"x2050",m:-1,t:`The 20-day average is below the 50-day average. The medium-term trend is pointing down.`});
+  rules.push(p>L(s50)
+    ? {k:"p50",m:1,t:`Price is above its 50-day average (${usd(L(s50))}).`}
+    : {k:"p50",m:-1,t:`Price is ${((1-p/L(s50))*100).toFixed(1)}% below its 50-day average (${usd(L(s50))}).`});
+  const h=L(hist), hp=hist[n-2];
+  rules.push(h>0 ? {k:"macd",m:1,t:`MACD is above its signal line, so short-term momentum is positive.`}
+    : (h>hp ? {k:"macd",m:0,t:`MACD is below its signal line but improving. Momentum is still negative, though selling is slowing.`}
+            : {k:"macd",m:-1,t:`MACD is below its signal line and falling, so short-term momentum is negative.`}));
+  const rv=L(r);
+  rules.push(rv<30 ? {k:"rsi",m:1,t:`RSI is ${rv.toFixed(0)}, below 30: oversold. Selling may be close to exhausted.`}
+    : rv>70 ? {k:"rsi",m:-1,t:`RSI is ${rv.toFixed(0)}, above 70: overbought. Price has run up fast and often cools off.`}
+    : {k:"rsi",m:0,t:`RSI is ${rv.toFixed(0)}, in the neutral zone (30 to 70).`});
+  const big=bigDays(a,c.vols,10);
+  if(big){ const net=big.reduce((x,d)=>x+(d.ret>0?1:-1),0);
+    rules.push(net>0 ? {k:"whale",m:1,t:`Whale activity: ${big.length} day${big.length>1?"s":""} of unusually heavy trading in the last 10, mostly with rising prices. Big buyers look active.`}
+      : net<0 ? {k:"whale",m:-1,t:`Whale activity: ${big.length} day${big.length>1?"s":""} of unusually heavy trading in the last 10, mostly with falling prices. Big sellers look active.`}
+      : {k:"whale",m:0,t: big.length?`Whale activity: heavy trading days in the last 10 were split between up and down days.`:`Whale activity: no unusually heavy trading days in the last 10.`}); }
+  const score=rules.reduce((x,y)=>x+y.m,0);
+  const signal= score>=2?"BUY":score<=-2?"SELL":"HOLD";
+  let note="";
+  if(signal==="SELL" && rv<35) note="Oversold inside a downtrend. Bounces happen here, but the rules wait for price to get back above its 20-day average before calling a buy.";
+  else if(signal==="BUY" && rv>65) note="Trend is up but RSI is getting high. Buying after a fast run-up risks catching the top; a pullback toward the 20-day average is a calmer entry.";
+  const stopPct=Math.min(.25,Math.max(.05,2*move14));
+  return {a,s20,s50,s200,r,hist,p,rsi:rv,vol,move14,hi,lo,rules,score,signal,note,stopPct};
+}
+const SIGWORD={BUY:"Buy",HOLD:"Hold / wait",SELL:"Sell / avoid"};
+
+/* ---------- Monte Carlo: 10,000 paths resampled from the past year's daily moves ---------- */
+const MC_CACHE={};
+function monteCarlo(id,an,days=30,N=10000){
+  const key=id+":"+an.p+":"+an.stopPct+":"+an.a.length; if(MC_CACHE[key]) return MC_CACHE[key];
+  const a=an.a.slice(-366), lr=[]; for(let i=1;i<a.length;i++) lr.push(Math.log(a[i]/a[i-1]));
+  let s=Math.floor(an.p*1000)>>>0||1; const rnd=()=>{ s=(s+0x6D2B79F5)>>>0; let t=s; t=Math.imul(t^t>>>15,t|1); t^=t+Math.imul(t^t>>>7,t|61); return ((t^t>>>14)>>>0)/4294967296; };
+  const stopL=Math.log(1-an.stopPct), tgtL=Math.log(1+2*an.stopPct); const fin=new Float64Array(N); let hitT=0,hitS=0,hitTs=0,hitSs=0; const sTgtL=Math.log(Math.max(0.01,1-2*an.stopPct)), sStopL=Math.log(1+an.stopPct);
+  for(let k=0;k<N;k++){ let x=0, done=0; for(let d=0;d<days;d++){ x+=lr[(rnd()*lr.length)|0]; if(!(done&1)){ if(x<=stopL){hitS++;done|=1;} else if(x>=tgtL){hitT++;done|=1;} } if(!(done&2)){ if(x>=sStopL){hitSs++;done|=2;} else if(x<=sTgtL){hitTs++;done|=2;} } } fin[k]=Math.exp(x); }
+  const sorted=Array.from(fin).sort((x,y)=>x-y), q=p=>sorted[Math.min(N-1,Math.floor(p*N))];
+  const bins=40, lo=q(.01), hi=q(.99), hist=Array(bins).fill(0); for(const v of sorted){ if(v<lo||v>hi) continue; hist[Math.min(bins-1,Math.floor((v-lo)/(hi-lo)*bins))]++; }
+  const r={N,days,p5:q(.05),p25:q(.25),p50:q(.5),p75:q(.75),p95:q(.95),up:sorted.filter(v=>v>1).length/N,pT:hitT/N,pS:hitS/N,pTs:hitTs/N,pSs:hitSs/N,lo,hi,hist};
+  MC_CACHE[key]=r; return r;
+}
+function ideaFor(id,B){
+  const c=S.coins[id]; const an=c&&analyze(c); if(!an) return null; const st=S.settings, budget=+st.budget||0, risk=budget*(+st.riskPct||0)/100;
+  const mult=moodOf()?.mult??1, riskAmt=risk*mult, cap=budget*0.3, mc=monteCarlo(id,an), pick=pickTrade(an);
+  const type=pick?pick.type:an.signal==="SELL"?"none":"wait", dir=type==="short"?-1:1, lev=pick?pick.lev:1;
+  const stop=an.p*(1-dir*an.stopPct), target=an.p*(1+dir*2*an.stopPct);
+  let size=0, margin=0, liq=null, fees=0;
+  if(type==="spot"){ size=Math.max(0,Math.min(riskAmt/an.stopPct,cap,B.cash)); margin=size; fees=size*(+st.feePct||0)/100*2; }
+  else if(pick){ margin=Math.max(0,Math.min(riskAmt/an.stopPct/lev,cap,B.cash)); size=margin*lev; liq=an.p*(1-dir*(1/lev-LEV.mm)); fees=size*LEV.fee*2; }
+  const spotSize=Math.max(0,Math.min(riskAmt/an.stopPct,cap,B.cash));
+  const pT=dir>0?mc.pT:mc.pTs, pS=dir>0?mc.pS:mc.pSs, edge=pT-pS; let conf="Low";
+  if(pick && edge>0.1) conf="High"; else if(pick || edge>0.05) conf="Medium";
+  return {id,c,an,mc,pick,type,dir,lev,size,margin,liq,fees,stop,target,pT,pS,conf,edge,spotSize,worst:size*an.stopPct+fees};
+}
+function tradeChip(I){ return I.type==="spot"?`<span class="chip BUY">Spot buy</span>`:I.type==="long"?`<span class="chip BUY">Long ${I.lev.toFixed(1)}×</span>`:I.type==="short"?`<span class="chip SELL">Short ${I.lev.toFixed(1)}×</span>`:I.type==="wait"?`<span class="chip HOLD">Wait</span>`:I.an.score<=-3?`<span class="chip SELL" title="The rules would short here, but RSI says it is already oversold, where shorts often get squeezed.">Too oversold to short</span>`:`<span class="chip SELL">Don't buy now</span>`; }
+function levPlan(I){ const st=S.settings, long=I.dir>0;
+  return `<div><h3 style="margin-bottom:8px">Trade plan: ${long?"leveraged long":"short"} at ${I.lev.toFixed(1)}×</h3>
+  <div class="plan">
+    <div><span class="label">You put in (margin)</span><span class="v">${usd(I.margin,2)}</span><span class="small muted">from your ${usd(+st.budget||0,0)}</span></div>
+    <div><span class="label">Position size</span><span class="v">${usd(I.size,2)}</span><span class="small muted">${I.lev.toFixed(1)}× your margin</span></div>
+    <div><span class="label">Stop-loss</span><span class="v">${usd(I.stop)}</span><span class="small muted">${(I.an.stopPct*100).toFixed(1)}% ${long?"below":"above"} now</span></div>
+    <div><span class="label">Take-profit</span><span class="v">${usd(I.target)}</span><span class="small muted">${(I.an.stopPct*200).toFixed(1)}% ${long?"above":"below"} now</span></div>
+    <div><span class="label">Liquidation</span><span class="v down">${usd(I.liq)}</span><span class="small muted">${(Math.abs(I.liq/I.an.p-1)*100).toFixed(1)}% ${long?"below":"above"} now: margin is gone</span></div>
+    <div><span class="label">Worst case at stop</span><span class="v down">−${usd(I.worst,2)}</span><span class="small muted">incl. ~${usd(I.fees,2)} fees, plus funding</span></div>
+    <div class="wide small muted">${esc(I.pick.why)} Each trade risks about ${usd(+st.budget*(+st.riskPct||0)/100,2)} at the stop, same as a spot trade. Leverage only means you lock up less cash. A fast move or gap can skip past the stop to liquidation and lose the whole margin. Futures fees and funding here are estimates; the exchange shows the real ones. This plan has only been tested with fake money in the Bot tab.</div>
+  </div></div>`; }
+function mcSVG(mc,price){
+  const W=800,H=120,pl=6,pr=6,pb=22, mx=Math.max(...mc.hist), bw=(W-pl-pr)/mc.hist.length, X=v=>pl+(v-mc.lo)/(mc.hi-mc.lo)*(W-pl-pr);
+  const bars=mc.hist.map((h,i)=>{ const v=mc.lo+(i+.5)*(mc.hi-mc.lo)/mc.hist.length; const bh=h/mx*(H-pb-8);
+    return `<rect x="${(pl+i*bw+1).toFixed(1)}" y="${(H-pb-bh).toFixed(1)}" width="${(bw-2).toFixed(1)}" height="${bh.toFixed(1)}" fill="${v>=1?"var(--buy)":"var(--sell)"}" opacity=".55"/>`; }).join("");
+  const mark=(v,l,anchor)=>`<line x1="${X(v)}" x2="${X(v)}" y1="4" y2="${H-pb}" stroke="var(--fg)" stroke-dasharray="3 3" opacity=".6"/><text x="${X(v)}" y="${H-6}" font-size="11" fill="var(--muted)" text-anchor="${anchor}" font-family="var(--f-mono)">${esc(l)} ${esc(usd(price*v))}</text>`;
+  return `<svg viewBox="0 0 ${W} ${H}" style="display:block;width:100%;height:auto" role="img" aria-label="Spread of simulated prices in ${mc.days} days">${bars}${mark(mc.p5,"5%","start")}${mark(mc.p50,"median","middle")}${mark(mc.p95,"95%","end")}</svg>`;
+}
+let TAB="today"; try{ TAB=localStorage.getItem("desk.tab")||"today"; }catch{}
+function setTab(t){ TAB=t; try{ localStorage.setItem("desk.tab",t); }catch{} renderTabs(); window.scrollTo({top:0}); }
+function renderTabs(){ const app=$("app"); if(!app) return; app.dataset.tab=TAB; document.querySelectorAll("#tabs [data-go]").forEach(b=>{ b.setAttribute("aria-selected",b.dataset.go===TAB?"true":"false"); b.onclick=()=>setTab(b.dataset.go); }); }
+function moreBlock(key,label,inner){ return `<details class="more" data-more="${key}" ${S["more_"+key]?"open":""}><summary>${label}</summary><div style="display:grid;gap:16px">${inner}</div></details>`; }
+function bindMore(el){ el.querySelectorAll("details[data-more]").forEach(d=>d.ontoggle=()=>{ S["more_"+d.dataset.more]=d.open; }); }
+function renderIdeas(B){
+  const el=$("ideas"); const list=S.watch.map(id=>ideaFor(id,B)).filter(Boolean);
+  if(!list.length){ el.innerHTML=""; el.hidden=true; return; } el.hidden=false;
+  list.sort((x,y)=>(y.pick?1:0)-(x.pick?1:0)||y.edge-x.edge);
+  const total=list.length, shown=S.allIdeas?list:list.slice(0,3);
+  el.innerHTML=`<div class="top"><div><h2>Top trade ideas</h2><div class="small muted">The best rule-based setups on your watchlist right now: spot buy, leveraged long or short (max 5×), with how much to put in. Automated, not financial advice; you place trades yourself. Tap a row to open the coin.</div></div>${total>3?`<button id="allideas">${S.allIdeas?"Show top 3":`Show all ${total}`}</button>`:""}</div>
+  <div class="tbl"><table><thead><tr><th>Coin</th><th>Trade</th><th class="r">Entry</th><th class="r">Stop-loss</th><th class="r">Target</th><th class="r">Liquidation</th><th class="r">You put in</th><th class="r">Position size</th><th class="r">Target first*</th><th>Confidence</th></tr></thead><tbody>
+  ${shown.map(i=>`<tr class="irow" data-id="${esc(i.id)}" style="cursor:pointer"><td><b>${esc((i.c.symbol||i.id).toUpperCase())}</b></td>
+    <td>${tradeChip(i)}</td>
+    <td class="r num">${usd(i.an.p)}</td><td class="r num">${usd(i.stop)}</td><td class="r num">${usd(i.target)}</td>
+    <td class="r num">${i.liq?usd(i.liq):'<span class="muted">–</span>'}</td>
+    <td class="r num">${i.pick?usd(i.margin,2):'<span class="muted">$0</span>'}</td>
+    <td class="r num">${i.pick?usd(i.size,2):'<span class="muted">–</span>'}</td>
+    <td class="r num">${(i.pT*100).toFixed(0)}% <span class="muted">vs ${(i.pS*100).toFixed(0)}% stop</span></td>
+    <td>${esc(i.conf)}</td></tr>`).join("")}
+  </tbody></table></div>
+  <div class="small muted">*Share of 10,000 simulated 30-day paths where the price reached the target before the stop-loss. For shorts the target is below the price. Confidence is High only when the rules pick a trade and the target is hit first at least 10 points more often than the stop. Long and short sizes risk the same amount at the stop as a spot buy; leverage just means less cash is locked up.</div>`;
+  el.querySelectorAll(".irow").forEach(r=>r.onclick=()=>{ S.sel=r.dataset.id; render(); setTab("coins"); });
+  const ai=$("allideas"); if(ai) ai.onclick=()=>{ S.allIdeas=!S.allIdeas; render(); };
+}
+
+/* ---------- portfolio (FIFO lots) ---------- */
+function book(){
+  const st=S.settings, budget=+st.budget||0; let cash=budget, realized=0, fees=0; const lots={}, closed=[], warn=[];
+  const tr=S.trades.slice().sort((x,y)=>(x.date||"").localeCompare(y.date||"")||(x.createdAt||0)-(y.createdAt||0));
+  for(const t of tr){
+    const fee=+t.fee||0, price=+t.price, q=+t.qty||(+t.usd/price); fees+=fee; if(!price||!q) continue;
+    (lots[t.coin] ||= []);
+    if(t.side==="buy"){ cash-= +t.usd+fee; lots[t.coin].push({id:t.id,coin:t.coin,qty:q,price,date:t.date,cost:+t.usd+fee}); }
+    else {
+      cash+= +t.usd-fee; let left=q;
+      for(const lot of lots[t.coin]){ if(left<=1e-12) break; if(lot.qty<=1e-12) continue;
+        const take=Math.min(lot.qty,left), cost=lot.cost*take/lot.qty, gain=take*price-cost-fee*take/q;
+        realized+=gain; closed.push({coin:t.coin,qty:take,buyDate:lot.date,sellDate:t.date,gain,held:daysBetween(lot.date,t.date)});
+        lot.cost-=cost; lot.qty-=take; left-=take; }
+      if(left>1e-9){ warn.push(`A sale of ${(S.coins[t.coin]?.symbol||t.coin).toUpperCase()} on ${t.date} is bigger than what you held.`); realized+=left*price; }
+    }
+  }
+  const open=Object.values(lots).flat().filter(l=>l.qty>1e-12);
+  let value=0, cost=0; const per={};
+  for(const l of open){ const px=S.coins[l.coin]?.price; const v=px?l.qty*px:l.cost; value+=v; cost+=l.cost;
+    const p=(per[l.coin] ||= {qty:0,value:0,cost:0}); p.qty+=l.qty; p.value+=v; p.cost+=l.cost; }
+  const total=cash+value;
+  return {budget,cash,value,cost,total,pnl:total-budget,pnlPct:budget?(total-budget)/budget*100:0,realized,fees,open,closed,per,warn};
+}
+
+/* ---------- live data through the Claude app's browser ---------- */
+function textOf(r){ if(typeof r?.payload==="string") return r.payload; return (r?.content||[]).filter(b=>b.type==="text").map(b=>b.text).join("\n"); }
+function parseJsonText(t){ let b=t; const i=b.indexOf("\n---\n"); if(i>=0) b=b.slice(i+5); const j=b.lastIndexOf("\n\nTab Context"); if(j>=0) b=b.slice(0,j);
+  const k=b.search(/[\[{]/); if(k>0) b=b.slice(k); return JSON.parse(b.trim()); }
+async function browserGet(url){
+  const m=S.mcp;
+  if(S.tabId){ try{ await m.callTool(HOST,"navigate",{url,tabId:S.tabId},{cache:false}); }catch(e){ if(e.code==="tool_error") S.tabId=null; else throw e; } }
+  if(!S.tabId){ const r=await m.callTool(HOST,"preview_start",{url},{cache:false}); const mt=textOf(r).match(/\(tabId\s+([^)\s]+)\)/); S.tabId=mt?mt[1]:null; }
+  for(let tries=0;tries<3;tries++){
+    await sleep(tries?1500:700);
+    const args={max_chars:200000}; if(S.tabId) args.tabId=S.tabId;
+    const r=await m.callTool(HOST,"get_page_text",args,{cache:false});
+    try{ const j=parseJsonText(textOf(r)); if(j?.status?.error_code===429) throw {code:"rate",message:"CoinGecko is rate-limiting requests. Wait a minute and refresh again."}; return j; }
+    catch(e){ if(e.code==="rate") throw e; }
+  }
+  throw {code:"parse",message:"CoinGecko's answer could not be read. Try Refresh again in a moment."};
+}
+function mcpMessage(e){
+  switch(e?.code){
+    case "server_not_connected": S.host=false; S.mcp=null; return "Live refresh is not available here.";
+
+    case "rate": case "parse": return e.message;
+
+    default: return "Live refresh failed"+(e?.message?": "+e.message:"")+".";
+  }
+}
+async function refreshLive(onlyIds){
+  if(S.busy||!S.mcp||!S.db) return; const ids=(onlyIds||S.watch).filter(Boolean); if(!ids.length) return;
+  S.busy=true; S.err=""; S.msg="Fetching prices…"; render();
+  try{
+    const mk=await browserGet(`${CG}/coins/markets?vs_currency=usd&ids=${ids.map(encodeURIComponent).join(",")}&price_change_percentage=24h,7d,30d`);
+    if(!Array.isArray(mk)) throw {code:"parse",message:"CoinGecko returned something unexpected."};
+    const found=new Set(mk.map(m=>m.id)); const missing=ids.filter(i=>!found.has(i));
+    for(const m of mk){
+      const old=S.coins[m.id]||{}; const now=new Date().toISOString();
+      const doc={id:m.id,symbol:m.symbol,name:m.name,price:m.current_price,mcap:m.market_cap,rank:m.market_cap_rank,vol:m.total_volume,
+        high24:m.high_24h,low24:m.low_24h,ch24:m.price_change_percentage_24h_in_currency,ch7:m.price_change_percentage_7d_in_currency,
+        ch30:m.price_change_percentage_30d_in_currency,circ:m.circulating_supply,total:m.total_supply,max:m.max_supply,ath:m.ath,athDate:m.ath_date,
+        updatedAt:now,source:"CoinGecko",t0:old.t0,closes:old.closes,vols:old.vols||null,chartAt:old.chartAt||null};
+      const stale=!old.closes||!old.chartAt||(Date.now()-new Date(old.chartAt).getTime())>6*3600e3;
+      if(stale){
+        S.msg=`Fetching 1-year chart for ${m.name}…`; render(); await sleep(1500);
+        const ch=await browserGet(`${CG}/coins/${encodeURIComponent(m.id)}/market_chart?vs_currency=usd&days=365&interval=daily`);
+        if(ch?.prices?.length){ doc.t0=Math.round(ch.prices[0][0]/1000); doc.closes=ch.prices.map(p=>+(+p[1]).toPrecision(6)); doc.vols=(ch.total_volumes||[]).map(v=>+(v[1]/1e6).toPrecision(3)); doc.chartAt=now; }
+      } else if(doc.closes){
+        const c=doc.closes.slice(), idx=Math.floor((Date.now()/1000-doc.t0)/86400);
+        const vv=(old.vols||[]).slice(), vt=+(m.total_volume/1e6).toPrecision(3);
+        if(idx>c.length-1){ c.push(doc.price); if(old.vols) vv.push(vt); } else { c[c.length-1]=doc.price; if(old.vols) vv[vv.length-1]=vt; }
+        doc.closes=c.slice(-400); if(old.vols) doc.vols=vv.slice(-400); if(c.length>400) doc.t0+= (c.length-400)*86400;
+      }
+      await S.db.doc("coins/"+m.id).set(doc);
+    }
+    S.msg=missing.length?`Updated. CoinGecko has no coin with the id "${missing.join('", "')}".`:"";
+  }catch(e){ S.err=mcpMessage(e); S.msg=""; }
+  S.busy=false; render();
+}
+function startAuto(){ if(S.auto) return; S.auto=setInterval(()=>{ if(!document.hidden) refreshLive(); },10*60e3); }
+
+const SYM={btc:"bitcoin",eth:"ethereum",sol:"solana",xrp:"ripple",ada:"cardano",doge:"dogecoin",avax:"avalanche-2",link:"chainlink",dot:"polkadot",uni:"uniswap",ltc:"litecoin",comp:"compound-governance-token",compound:"compound-governance-token",pol:"polygon-ecosystem-token",matic:"polygon-ecosystem-token",polygon:"polygon-ecosystem-token",atom:"cosmos",near:"near",apt:"aptos",arb:"arbitrum",op:"optimism",sui:"sui",shib:"shiba-inu",pepe:"pepe",bch:"bitcoin-cash",xlm:"stellar",hbar:"hedera-hashgraph",fil:"filecoin",icp:"internet-computer",etc:"ethereum-classic",mkr:"maker",crv:"curve-dao-token",ldo:"lido-dao",inj:"injective-protocol",render:"render-token",rndr:"render-token",grt:"the-graph",sand:"the-sandbox",mana:"decentraland",algo:"algorand",xtz:"tezos",avalanche:"avalanche-2",xrp:"ripple",bnb:"binancecoin",trx:"tron",ton:"the-open-network",usdc:"usd-coin",ondo:"ondo-finance",ena:"ethena",tia:"celestia",sei:"sei-network",jup:"jupiter-exchange-solana",bonk:"bonk",wif:"dogwifcoin",hype:"hyperliquid"};
+async function searchCoins(q){
+  q=q.trim(); if(!q) return; const key=q.toLowerCase().replace(/\s+/g,"-");
+  if(!S.mcp){ addCoin(SYM[key]||key); return; }
+  S.searching=true; S.search=[]; render();
+  try{ const j=await browserGet(`${CG}/search?query=${encodeURIComponent(q)}`); S.search=(j.coins||[]).slice(0,6); if(!S.search.length) S.err=`No coins match "${q}".`; }
+  catch(e){ if(e?.code==="server_not_connected"){ S.host=false; S.searching=false; return addCoin(SYM[key]||key); } S.err=mcpMessage(e); }
+  S.searching=false; render();
+}
+async function addCoin(id){
+  if(!S.db||!id) return; S.search=[];
+  if(!S.watch.includes(id)) await S.db.doc("config/watchlist").set({ids:[...S.watch,id]});
+  S.sel=id;
+  if(S.coins[id]){ render(); return; }
+  if(S.mcp){ await refreshLive([id]); if(S.coins[id]) return; }
+  const nm=(Object.entries(SYM).find(([,v])=>v===id)?.[0]||id).toUpperCase();
+  S.msg=`Added ${nm}, but its prices could not load. Check that the name is right (CoinGecko id) and click Refresh live data.`; render();
+}
+async function removeCoin(id){ if(!S.db) return; const ids=S.watch.filter(x=>x!==id); await S.db.doc("config/watchlist").set({ids}); if(S.sel===id) S.sel=ids[0]||null; render(); }
+
+/* ---------- strategy engine: same rules for the backtest and the paper bot ---------- */
+const RULENAME={t200:"Long-term trend (price vs 200-day avg)",x2050:"Medium trend (20 vs 50-day avg)",p50:"Price vs 50-day avg",macd:"Momentum (MACD)",rsi:"RSI oversold / overbought",whale:"Whale activity (heavy-volume days)"};
+const dayKey=sec=>new Date(sec*1000).toISOString().slice(0,10);
+const yesterday=()=>new Date(Date.now()-864e5).toISOString().slice(0,10);
+function seriesFor(ids){ const out={}; for(const id of ids){ const c=S.coins[id]; if(!c?.closes?.length||!c.t0) continue;
+  const dates=c.closes.map((_,i)=>dayKey(c.t0+i*86400)); out[id]={c,dates,idx:new Map(dates.map((d,i)=>[d,i]))}; } return out; }
+/* Combined bot: for each trade it picks a spot buy, a leveraged long or a short (paper only, max 5x).
+   Futures cost estimates, perpetual-futures style: 0.1% fee per side on the position size; funding 0.03% of the size per day
+   (longs pay it, shorts receive it); liquidation when losses eat the margin down to 2.5% maintenance, plus a 1% liquidation fee.
+   Spot uses the fee estimate from your settings. Prices are daily closes, so intraday wicks that would liquidate are not seen. */
+const LEV={max:5,fee:0.001,fundDay:0.0003,mm:0.025,liqFee:0.01};
+const TYPENAME={spot:"Spot buy",long:"Leveraged long",short:"Short"};
+const posType=q=>q.type||"spot";
+function posValue(q){ return posType(q)==="spot" ? q.qty*q.last : Math.max(0,q.margin+q.dir*(q.last-q.entry)*q.qty); }
+function pickTrade(an){
+  const r=`RSI ${an.rsi.toFixed(0)}`, lev=Math.max(1,Math.min(LEV.max,0.5/an.stopPct));
+  if(an.score>=3){
+    if(an.rsi>=65) return {type:"spot",lev:1,why:`Strong buy (score +${an.score}) but ${r} is high, so a spot buy instead of leverage.`};
+    if(lev<1.5) return {type:"spot",lev:1,why:`Strong buy (score +${an.score}) but the coin swings too much for safe leverage, so a spot buy.`};
+    return {type:"long",lev,why:`Strong buy (score +${an.score}, ${r}), so a leveraged long at ${lev.toFixed(1)}×, set so the stop-loss sits well before liquidation.`};
+  }
+  if(an.score>=2) return {type:"spot",lev:1,why:`Buy (score +${an.score}): a moderate signal, so a plain spot buy with no leverage.`};
+  if(an.score<=-3){
+    if(an.rsi<35) return null; // already oversold: shorts often get squeezed here
+    return {type:"short",lev,why:`Strong sell (score ${an.score}, ${r}), so a short at ${lev.toFixed(1)}× that gains if the price keeps falling.`};
+  }
+  return null;
+}
+function simulate(ids, st, fromDate, toDate){
+  const ser=seriesFor(ids), fee=(+S.settings.feePct||0)/100, risk=(+S.settings.riskPct||2)/100;
+  const dates=[...new Set(Object.values(ser).flatMap(s=>s.dates))].filter(d=>d>fromDate&&d<=toDate).sort();
+  st.liqs=st.liqs||0; st.funding=st.funding||0;
+  const close=(id,pos,D,p,why,liq)=>{ const t=posType(pos); let back,f;
+    if(t==="spot"){ const gross=pos.qty*p; f=gross*fee; back=gross-f; }
+    else { const notional=pos.qty*p; f=notional*(liq?LEV.liqFee:LEV.fee); back=Math.max(0,pos.margin+pos.dir*(p-pos.entry)*pos.qty-f); if(liq) st.liqs++; }
+    st.cash+=back;
+    st.trades.push({date:D,coin:id,type:t,side:"close",lev:pos.lev||1,price:p,usd:pos.qty*p,fee:f,pnl:back-pos.cost,liq:!!liq,days:daysBetween(pos.date,D),why,rules:pos.rules||[]});
+    delete st.pos[id]; };
+  for(const D of dates){
+    for(const id of ids){ const s=ser[id]; if(!s) continue; const i=s.idx.get(D); if(i==null) continue;
+      const p=s.c.closes[i]; let pos=st.pos[id];
+      if(pos){ pos.last=p;
+        if(posType(pos)!=="spot"){ const f=pos.qty*p*LEV.fundDay*pos.dir; pos.margin-=f; st.funding+=f;
+          if(pos.dir*(p-pos.liq)<=0 || pos.margin+pos.dir*(p-pos.entry)*pos.qty<=0){
+            close(id,pos,D,p,`Liquidated at ${usd(p)}: the move against this ${pos.lev.toFixed(1)}× ${pos.dir>0?"long":"short"} used up the margin.`,true); continue; } } }
+      if(i<59) continue;
+      const an=analyze({closes:s.c.closes.slice(0,i+1),vols:s.c.vols&&s.c.vols.slice(0,i+1)}); if(!an) continue;
+      pos=st.pos[id];
+      if(pos){ const d=pos.dir||1; let why="";
+        if(d*(p-pos.stop)<=0) why=`Stop-loss hit at ${usd(pos.stop)}`; else if(d*(p-pos.target)>=0) why=`Target reached at ${usd(pos.target)}`;
+        else if(d>0&&an.signal==="SELL") why=`Signal turned to sell (score ${an.score})`; else if(d<0&&an.signal==="BUY") why=`Signal turned to buy (score +${an.score})`;
+        if(why) close(id,pos,D,p,why,false); }
+      if(st.pos[id]) continue;
+      const pick=pickTrade(an); if(!pick) continue;
+      const eq=st.cash+Object.values(st.pos).reduce((a,q)=>a+posValue(q),0);
+      const dir=pick.type==="short"?-1:1, up=an.rules.filter(r=>r.m*dir>0).map(r=>r.k);
+      const stop=p*(1-dir*an.stopPct), target=p*(1+dir*2*an.stopPct), ruleTxt=`${dir>0?"Rules for":"Rules against"}: ${up.map(k=>RULENAME[k]).join(", ")}.`;
+      if(pick.type==="spot"){ const size=Math.min(eq*risk/an.stopPct, eq*0.3, st.cash/(1+fee)); if(size<1) continue; const f=size*fee; st.cash-=size+f;
+        st.pos[id]={type:"spot",dir:1,lev:1,qty:size/p,entry:p,stop,target,date:D,cost:size+f,last:p,rules:up};
+        st.trades.push({date:D,coin:id,type:"spot",side:"open",lev:1,price:p,usd:size,fee:f,stop,target,rules:up,why:`${pick.why} Stop ${usd(stop)}, target ${usd(target)}. ${ruleTxt}`});
+      } else { const lev=pick.lev; let notional=Math.min(eq*risk/an.stopPct, eq*0.3*lev); const margin=Math.min(notional/lev, st.cash/(1+lev*LEV.fee)); if(margin<1) continue;
+        notional=margin*lev; const openFee=notional*LEV.fee, liq=p*(1-dir*(1/lev-LEV.mm)); st.cash-=margin+openFee;
+        st.pos[id]={type:pick.type,dir,lev,qty:notional/p,entry:p,margin,openFee,cost:margin+openFee,stop,target,liq,date:D,last:p,rules:up};
+        st.trades.push({date:D,coin:id,type:pick.type,side:"open",lev,price:p,usd:notional,margin,fee:openFee,stop,target,liqPrice:liq,rules:up,
+          why:`${pick.why} ${usd(margin,2)} of margin controls ${usd(notional,2)}. Stop ${usd(stop)}, target ${usd(target)}, liquidation ${usd(liq)}. ${ruleTxt}`}); }
+    }
+    st.equity.push({d:D,v:+(st.cash+Object.values(st.pos).reduce((a,q)=>a+posValue(q),0)).toFixed(4)}); st.lastDate=D;
+  }
+  return st;
+}
+function newBook(budget,lastDate){ return {budget,cash:budget,pos:{},trades:[],equity:[],lastDate}; }
+function statsOf(st){
+  const eq=st.equity; if(!eq.length) return null; let peak=-1,dd=0; for(const e of eq){ peak=Math.max(peak,e.v); dd=Math.min(dd,e.v/peak-1); }
+  const closed=st.trades.filter(t=>t.pnl!=null), wins=closed.filter(t=>t.pnl>0).length, end=eq[eq.length-1].v;
+  const by={}; for(const k in TYPENAME) by[k]={n:0,closed:0,wins:0,pnl:0,liqs:0};
+  for(const t of st.trades){ const b=by[t.type||"spot"]; if(!b) continue; if(t.pnl==null) b.n++; else { b.closed++; b.pnl+=t.pnl; if(t.pnl>0) b.wins++; if(t.liq) b.liqs++; } }
+  return {end,ret:(end/st.budget-1)*100,dd:dd*100,trades:st.trades.filter(t=>t.pnl==null).length,closed:closed.length,winRate:closed.length?wins/closed.length*100:null,by,liqs:st.liqs||0,funding:st.funding||0};
+}
+const LAB={key:"",bt:null,hold:null,score:null};
+function labData(){
+  const key=S.watch.join(",")+"|"+S.watch.map(id=>S.coins[id]?.updatedAt).join(",")+"|"+S.settings.riskPct+"|"+S.settings.feePct+"|"+S.settings.budget;
+  if(LAB.key===key) return LAB; LAB.key=key;
+  const ser=seriesFor(S.watch), ids=Object.keys(ser); if(!ids.length){ LAB.bt=null; return LAB; }
+  const first=ids.map(id=>ser[id].dates[59]).filter(Boolean).sort()[0]; const budget=+S.settings.budget||100;
+  const bt=simulate(ids,newBook(budget,first),first,yesterday()); LAB.bt=bt; LAB.btFrom=first;
+  // buy-and-hold benchmark: split the start amount equally on the first test day
+  const per=budget/ids.length, units={}; ids.forEach(id=>{ const i=ser[id].idx.get(bt.equity[0]?.d); if(i!=null) units[id]=per/ser[id].c.closes[i]; });
+  LAB.hold=bt.equity.map(e=>({d:e.d,v:ids.reduce((a,id)=>{ const i=ser[id].idx.get(e.d); return a+(units[id]&&i!=null?units[id]*ser[id].c.closes[i]:per); },0)}));
+  // rule scorecard: did each rule's +1 / -1 call the next 7 days correctly?
+  const sc={}; for(const k in RULENAME) sc[k]={k,pos:0,posUp:0,posRet:0,neg:0,negDown:0,negRet:0};
+  for(const id of ids){ const a=ser[id].c.closes; for(let i=59;i<a.length-8;i++){ const an=analyze({closes:a.slice(0,i+1),vols:ser[id].c.vols&&ser[id].c.vols.slice(0,i+1)}); if(!an) continue; const fwd=a[i+7]/a[i]-1;
+    for(const r of an.rules){ const x=sc[r.k]; if(r.m>0){x.pos++; x.posRet+=fwd; if(fwd>0)x.posUp++;} else if(r.m<0){x.neg++; x.negRet+=fwd; if(fwd<0)x.negDown++;} } } }
+  LAB.score=Object.values(sc).map(x=>({...x,acc:(x.pos+x.neg)?(x.posUp+x.negDown)/(x.pos+x.neg)*100:null})).sort((a,b)=>(b.acc??-1)-(a.acc??-1));
+  return LAB;
+}
+/* Live check: between daily closes, close open paper positions that hit stop, target or liquidation on live prices.
+   New trades still open only once a day at the daily close. prices = {coinId: price}, at = ISO time of the prices. */
+function liveCheck(st, prices, at){
+  const fee=(+S.settings.feePct||0)/100, closed=[], D=String(at).slice(0,10), hm=String(at).slice(11,16)+" UTC";
+  st.liqs=st.liqs||0;
+  for(const [id,pos] of Object.entries(st.pos||{})){ const p=prices[id]; if(!(p>0)) continue; pos.last=p;
+    const t=posType(pos), d=pos.dir||1; let why="", liq=false;
+    if(t!=="spot" && (d*(p-pos.liq)<=0 || pos.margin+d*(p-pos.entry)*pos.qty<=0)){ why=`Liquidated at ${usd(p)} (live check ${hm})`; liq=true; }
+    else if(d*(p-pos.stop)<=0) why=`Stop-loss hit: price ${usd(p)} (live check ${hm})`;
+    else if(d*(p-pos.target)>=0) why=`Target reached: price ${usd(p)} (live check ${hm})`;
+    if(!why) continue;
+    let back,f; if(t==="spot"){ const g=pos.qty*p; f=g*fee; back=g-f; } else { const n=pos.qty*p; f=n*(liq?LEV.liqFee:LEV.fee); back=Math.max(0,pos.margin+d*(p-pos.entry)*pos.qty-f); if(liq) st.liqs++; }
+    st.cash+=back; const tr={date:D,coin:id,type:t,side:"close",lev:pos.lev||1,price:p,usd:pos.qty*p,fee:f,pnl:back-pos.cost,liq,days:daysBetween(pos.date,D),why,rules:pos.rules||[],live:true};
+    st.trades.push(tr); closed.push(tr); delete st.pos[id]; }
+  st.live={at, v:+(st.cash+Object.values(st.pos).reduce((a,q)=>a+posValue(q),0)).toFixed(4)};
+  return closed;
+}
+async function paperLiveCheck(){
+  const P=S.paper; if(!S.db||!P||S.paperBusy||S.liveBusy) return; if(P.lastDate<yesterday()) return;
+  const ids=Object.keys(P.pos||{}).filter(id=>S.coins[id]?.price>0); if(!ids.length) return;
+  const at=ids.map(id=>S.coins[id].updatedAt).sort().at(-1); if(!at||(P.live?.at&&P.live.at>=at)) return;
+  S.liveBusy=true;
+  try{ const st=JSON.parse(JSON.stringify(P)); liveCheck(st,Object.fromEntries(ids.map(id=>[id,S.coins[id].price])),at); st.updatedAt=new Date().toISOString(); await S.db.doc("paper/state").set(st); }
+  catch(e){ S.err="The paper bot's live check failed: "+(e?.message||"unknown error"); render(); }
+  S.liveBusy=false;
+}
+async function paperCatchUp(){
+  if(!S.db||!S.paper||S.paperBusy) return; const y=yesterday(); if(S.paper.lastDate>=y) return;
+  const ids=S.watch.filter(id=>S.coins[id]?.closes); if(!ids.length) return;
+  S.paperBusy=true;
+  try{ const st=JSON.parse(JSON.stringify(S.paper)); const before=st.lastDate; simulate(ids,st,before,y);
+    if(st.lastDate!==before){ st.equity=st.equity.slice(-400); st.updatedAt=new Date().toISOString(); await S.db.doc("paper/state").set(st); } }
+  catch(e){ S.err="The paper bot could not update: "+(e?.message||"unknown error"); render(); }
+  S.paperBusy=false;
+}
+async function paperStart(){ if(!S.db) return; const d=new Date(Date.now()-2*864e5).toISOString().slice(0,10);
+  const st=newBook(+S.settings.budget||100,d); st.startDate=yesterday(); await S.db.doc("paper/state").set(st); }
+function equitySVG(lines,budget){
+  const W=800,H=170,pl=6,pr=64,pt=8,pb=22, all=lines.flatMap(l=>l.pts.map(p=>p.v)).concat([budget]); let mn=Math.min(...all), mx=Math.max(...all); const pad=(mx-mn)*.08||1; mn-=pad; mx+=pad;
+  const n=Math.max(...lines.map(l=>l.pts.length)); if(n<2) return "";
+  const x=i=>pl+i/(n-1)*(W-pl-pr), y=v=>pt+(1-(v-mn)/(mx-mn))*(H-pt-pb);
+  const ticks=niceTicks(mn,mx,3).map(t=>`<line x1="${pl}" x2="${W-pr}" y1="${y(t)}" y2="${y(t)}" stroke="var(--line)"/><text x="${W-pr+8}" y="${y(t)+4}" font-size="11" fill="var(--muted)" font-family="var(--f-mono)">${esc(usd(t,0))}</text>`).join("");
+  const pts=lines[0].pts; const xl=[0,n-1].map((i,k)=>`<text x="${x(i)}" y="${H-6}" font-size="11" fill="var(--muted)" text-anchor="${k?"end":"start"}">${esc(pts[i]?.d||"")}</text>`).join("");
+  return `<svg viewBox="0 0 ${W} ${H}" style="display:block;width:100%;height:auto" role="img" aria-label="Value over time">${ticks}
+    <line x1="${pl}" x2="${W-pr}" y1="${y(budget)}" y2="${y(budget)}" stroke="var(--muted)" stroke-dasharray="2 4"/>
+    ${lines.map(l=>`<path d="${l.pts.map((p,i)=>(i?"L":"M")+x(i).toFixed(1)+","+y(p.v).toFixed(1)).join("")}" fill="none" stroke="${l.color}" stroke-width="${l.w||2}" ${l.dash?`stroke-dasharray="${l.dash}"`:""}/>`).join("")}${xl}</svg>`;
+}
+function typeChip(t){ const k=t.type||"spot", lv=k!=="spot"&&t.lev?` ${(+t.lev).toFixed(1)}×`:""; return `<span class="chip ${k==="short"?"SELL":"BUY"}">${esc((TYPENAME[k]||k)+lv)}</span>`; }
+function tradeRows(trades){ return trades.slice().reverse().map(t=>{ const open=t.pnl==null;
+  return `<tr><td>${esc(t.date)}</td><td>${typeChip(t)} ${open?`<span class="small">Open</span>`:t.liq?`<span class="chip SELL">Liquidated</span>`:`<span class="small muted">Close</span>`}</td><td><b>${esc((S.coins[t.coin]?.symbol||t.coin).toUpperCase())}</b></td><td class="r num">${usd(t.price)}</td><td class="r num">${usd(t.usd,2)}</td><td class="r num">${!open?`<span class="${t.pnl>=0?"up":"down"}">${t.pnl>=0?"+":""}${usd(t.pnl,2)}</span>`:"–"}</td><td style="white-space:normal;min-width:240px">${esc(t.why)}</td></tr>`; }).join(""); }
+const TRADE_HEAD=`<thead><tr><th>Date</th><th>Type</th><th>Coin</th><th class="r">Price</th><th class="r">Size</th><th class="r">Result</th><th>Why</th></tr></thead>`;
+function byTypeHTML(s){ if(!s) return "";
+  return `<div class="tbl"><table><thead><tr><th>Trade type</th><th class="r">Opened</th><th class="r">Closed</th><th class="r">Wins</th><th class="r">Result</th><th class="r">Liquidated</th></tr></thead><tbody>
+  ${Object.entries(s.by).map(([k,b])=>`<tr><td>${esc(TYPENAME[k])}</td><td class="r num">${b.n}</td><td class="r num">${b.closed}</td><td class="r num">${b.closed?(b.wins/b.closed*100).toFixed(0)+"%":"–"}</td><td class="r num">${b.closed?`<span class="${b.pnl>=0?"up":"down"}">${b.pnl>=0?"+":""}${usd(b.pnl,2)}</span>`:"–"}</td><td class="r num">${b.liqs||(b.closed?"0":"–")}</td></tr>`).join("")}
+  </tbody></table></div><div class="small muted">Funding ${s.funding>=0?"paid":"received"}: ${usd(Math.abs(s.funding),2)}. Results include fees and funding.</div>`; }
+function posLine(id,q){ const t=posType(q), sym=esc((S.coins[id]?.symbol||id).toUpperCase());
+  return `<div class="small">${esc(TYPENAME[t])}${t==="spot"?"":` ${q.lev.toFixed(1)}×`} <b>${sym}</b> since ${esc(q.date)}: entry ${usd(q.entry)}, stop ${usd(q.stop)}, target ${usd(q.target)}${q.liq?`, liquidation ${usd(q.liq)}`:""}, now ${usd(q.last)}, worth ${usd(posValue(q),2)}.</div>`; }
+function renderLab(){
+  const el=$("lab"); const L=labData(); const budget=+S.settings.budget||100;
+  if(!L.bt){ el.innerHTML=`<h2>Strategy lab</h2><div class="empty">The lab needs price history for at least one coin.</div>`; return; }
+  const b=statsOf(L.bt), hEnd=L.hold.at(-1)?.v, hRet=(hEnd/budget-1)*100;
+  const P=S.paper, ps=P&&statsOf(P);
+  const paperHTML = !S.paperLoaded ? `<div class="empty">Loading…</div>` : !P
+    ? `<div class="empty" style="display:grid;gap:10px;justify-items:center"><span>The paper bot trades a fake ${usd(budget,0)} with the same rules every day, so you can see how they do on prices they have never seen.</span><button class="primary" id="pstart" ${S.db?"":"disabled"}>Start paper bot</button></div>`
+    : `<div class="stats">
+        <div><span class="label">Fake money now</span><span class="v">${usd(ps?ps.end:P.cash,2)}</span></div>
+        <div><span class="label">Return</span><span class="v">${ps?pct(ps.ret,2):"–"}</span></div>
+        <div><span class="label">Cash</span><span class="v">${usd(P.cash,2)}</span></div>
+        <div><span class="label">Open trades</span><span class="v">${Object.keys(P.pos||{}).length}</span></div></div>
+      ${P.equity.length>1?equitySVG([{pts:P.equity,color:"var(--accent)"}],P.budget):""}
+      ${Object.entries(P.pos||{}).map(([id,q])=>posLine(id,q)).join("")}
+      ${P.trades.length?byTypeHTML(ps):""}
+      ${P.trades.length?`<div class="tbl"><table>${TRADE_HEAD}<tbody>${tradeRows(P.trades)}</tbody></table></div>`:`<div class="small muted">No trades yet. The bot checks every coin on your watchlist once per day at the daily close. Score +2 means a spot buy, +3 or more a leveraged long (up to 5×), −3 or less a short. Anything in between means it waits in cash.</div>`}
+      ${P.live?`<div class="small">Live check ${esc(ago(P.live.at))}: worth <b>${usd(P.live.v,2)}</b> (${pct((P.live.v/P.budget-1)*100,2)}). Stops, targets and liquidations are checked on live prices every hour; new trades open only at the daily close.</div>`:""}
+      <div class="small muted">Started ${esc(P.startDate||"")}, last checked day ${esc(P.lastDate)}. It checks the days it missed whenever you open this page, so it never skips a day; open it at least every few months. ${S.confirmReset?`<button data-preset="yes">Reset to ${usd(budget,0)}</button> <button data-preset="no">Keep</button>`:`<button class="linkbtn" data-preset="ask">Reset paper bot</button>`}</div>`;
+  const best=L.score.filter(s=>s.acc!=null)[0], worst=L.score.filter(s=>s.acc!=null).at(-1);
+  el.innerHTML=`
+    <div><h2>Strategy lab</h2><div class="small muted">Test the rules with fake money before using real money. One bot picks per trade between a spot buy, a leveraged long and a short (max 5×). Score +2: spot buy. Score +3 or more with RSI under 65: leveraged long. Score −3 or less (not already oversold): short. Leverage is set so the stop-loss hits well before liquidation, and each trade risks the same share of the account as a spot trade. Leveraged trades here are fake money only.</div></div>
+    <div class="track-grid" style="grid-template-columns:minmax(0,1fr) minmax(0,1fr)">
+      <div style="display:grid;gap:12px;min-width:0">
+        <h3>Backtest · ${esc(L.btFrom)} to ${esc(L.bt.lastDate)}</h3>
+        <div class="stats">
+          <div><span class="label">Bot ended with</span><span class="v">${usd(b.end,2)}</span><span class="small">${pct(b.ret,1)}</span></div>
+          <div><span class="label">Just holding</span><span class="v">${usd(hEnd,2)}</span><span class="small">${pct(hRet,1)}</span></div>
+          <div><span class="label">Worst drop</span><span class="v down">${b.dd.toFixed(1)}%</span></div>
+          <div><span class="label">Trades / wins</span><span class="v">${b.trades} / ${b.winRate==null?"–":b.winRate.toFixed(0)+"%"}</span></div>
+        </div>
+        ${equitySVG([{pts:L.hold,color:"var(--sma200)",dash:"5 4",w:1.5},{pts:L.bt.equity,color:"var(--accent)"}],budget)}
+        <div class="legend"><span><i style="background:var(--accent)"></i>Bot with fake ${usd(budget,0)}</span><span><i style="background:var(--sma200)"></i>Buy and hold the watchlist, equal split</span></div>
+        ${byTypeHTML(b)}
+        <div class="small muted">Replays every day of the past year using only the prices known on that day. It trades at daily closing prices, so real fills, stops and liquidations can be worse: a wick during the day can liquidate a leveraged trade that looks safe at the close. Futures costs are estimates (0.1% fee per side, 0.03% funding per day, 1% liquidation fee); real funding changes every 8 hours. One year of one market mood is a small sample.</div>
+        <details><summary class="small">All ${L.bt.trades.length} backtest trades</summary><div class="tbl"><table>${TRADE_HEAD}<tbody>${tradeRows(L.bt.trades)}</tbody></table></div></details>
+      </div>
+      <div style="display:grid;gap:12px;min-width:0"><h3>Paper bot · live, fake money</h3>${paperHTML}</div>
+    </div>
+    <div style="display:grid;gap:8px"><h3>Which rules worked</h3>
+      <div class="tbl"><table><thead><tr><th>Rule</th><th class="r">Right after 7 days</th><th class="r">When it said up: avg 7-day move</th><th class="r">When it said down: avg 7-day move</th><th class="r">Calls</th></tr></thead><tbody>
+      ${L.score.map(s=>`<tr><td>${esc(RULENAME[s.k])}</td><td class="r num">${s.acc==null?"–":`<span class="${s.acc>=55?"up":s.acc<45?"down":""}">${s.acc.toFixed(0)}%</span>`}</td><td class="r num">${s.pos?pct(s.posRet/s.pos*100,2):"–"}</td><td class="r num">${s.neg?pct(s.negRet/s.neg*100,2):"–"}</td><td class="r num">${s.pos+s.neg}</td></tr>`).join("")}
+      </tbody></table></div>
+      <div class="small muted">Each day of the past year, each rule said up (+1) or down (−1). This counts how often the price really moved that way over the next 7 days; 50% is a coin flip. ${best&&worst?`Over this year, “${esc(RULENAME[best.k])}” did best and “${esc(RULENAME[worst.k])}” did worst.`:""} Once the paper bot has a few weeks of its own trades, these numbers can be used to give the better rules more weight.</div>
+    </div>`;
+  const ps0=$("pstart"); if(ps0) ps0.onclick=paperStart;
+  el.querySelectorAll("[data-preset]").forEach(btn=>btn.onclick=async()=>{ const v=btn.dataset.preset; if(v==="ask") S.confirmReset=true; else if(v==="no") S.confirmReset=false; else { S.confirmReset=false; await paperStart(); } render(); });
+}
+
+/* ---------- whale and insider moves ---------- */
+const LABELS={"0x000000000000000000000000000000000000dead":["Burn address (tokens destroyed)","burn"],
+  "0xf977814e90da44bfa03b6295a0616a897441acec":["Binance (exchange)","ex"],
+  "0x1a9c8182c09f50c8318d769245bea52c32be35bc":["Uniswap treasury (governance)","team"],
+  "0x4da27a545c0c5b758a6ba100e3a049001de870f5":["Aave Safety Module (staked AAVE)","stake"]};
+function holderLabel(addr){
+  if(LABELS[addr]) return LABELS[addr];
+  const seen=Object.values(S.holders).filter(h=>h.snaps?.at(-1)?.h.some(x=>x.a===addr)).length;
+  return seen>=2?["Likely exchange or custodian (big holder of several tokens)","ex"]:["Unlabeled wallet","w"];
+}
+function whaleHTML(id,c,an){
+  const big=an?bigDays(an.a,c.vols,30):null; let out="";
+  if(big){ const rows=big.slice().reverse().map(d=>`<tr><td>${esc(fmtDate(c.t0+d.i*86400))}</td><td class="r num">${d.x.toFixed(1)}×</td><td class="r num">${pct(d.ret*100)}</td><td>${d.ret>0?'<span class="chip BUY">Heavy buying</span>':'<span class="chip SELL">Heavy selling</span>'}</td></tr>`).join("");
+    out+=`<div style="display:grid;gap:6px"><h3>Heavy trading days · last 30 days</h3>
+      ${rows?`<div class="tbl"><table><thead><tr><th>Day</th><th class="r">Volume vs normal</th><th class="r">Price that day</th><th>Reading</th></tr></thead><tbody>${rows}</tbody></table></div>`:`<div class="small muted">No unusually heavy trading days in the last 30 days.</div>`}
+      <div class="small muted">A day counts when trading volume is at least 1.8 times its 30-day average. Big money moving with rising prices suggests buyers; with falling prices, sellers.</div></div>`; }
+  else out+=`<div class="small muted">Trading-volume history for this coin loads with the next refresh.</div>`;
+  const H=S.holders[id];
+  if(H?.snaps?.length){
+    const now=H.snaps.at(-1), prev=H.snaps.length>1?H.snaps.at(-2):null, pm=new Map((prev?.h||[]).map(x=>[x.a,x.s]));
+    const grp=snap=>{ const g={ex:0,team:0,top10:0}; snap.h.forEach((x,i)=>{ const k=holderLabel(x.a)[1]; if(k==="ex") g.ex+=x.s; if(k==="team") g.team+=x.s; if(i<10) g.top10+=x.s; }); return g; };
+    const g=grp(now), gp=prev?grp(prev):null, dlt=(a,b)=>b==null?"":` <span class="${a-b>=0?"up":"down"}">${a-b>=0?"+":""}${(a-b).toFixed(2)} pts</span>`;
+    const rows=now.h.slice(0,10).map(x=>{ const [lab]=holderLabel(x.a); const ch=pm.has(x.a)?x.s-pm.get(x.a):null;
+      return `<tr><td><a href="https://etherscan.io/token/${esc(H.contract)}?a=${esc(x.a)}" target="_blank" rel="noopener" class="num">${esc(x.a.slice(0,6)+"…"+x.a.slice(-4))}</a></td><td style="white-space:normal">${esc(lab)}</td><td class="r num">${x.s.toFixed(2)}%</td><td class="r num">${ch==null?(prev?'<span class="chip BUY">New</span>':"–"):`<span class="${ch>0?"up":ch<0?"down":"muted"}">${ch>0?"+":""}${ch.toFixed(2)}</span>`}</td></tr>`; }).join("");
+    out+=`<div style="display:grid;gap:8px"><h3>Insider and big-wallet moves</h3>
+      <div class="stats">
+        <div><span class="label">Top 10 wallets hold</span><span class="v">${g.top10.toFixed(1)}%${dlt(g.top10,gp?.top10)}</span></div>
+        <div><span class="label">On exchanges (top 25)</span><span class="v">${g.ex.toFixed(1)}%${dlt(g.ex,gp?.ex)}</span></div>
+        <div><span class="label">Team / treasury</span><span class="v">${g.team?g.team.toFixed(1)+"%":"–"}${g.team?dlt(g.team,gp?.team):""}</span></div>
+        <div><span class="label">Snapshots</span><span class="v">${H.snaps.length}</span><span class="small muted">latest ${esc(now.d)}</span></div></div>
+      <div class="tbl"><table><thead><tr><th>Wallet</th><th>Who</th><th class="r">Share of supply</th><th class="r">Change since ${esc(prev?.d||"last check")}</th></tr></thead><tbody>${rows}</tbody></table></div>
+      <div class="small muted">${prev?"":"Tracking started today, so changes show from tomorrow's snapshot. "}Rising exchange balances can mean holders are getting ready to sell; a team or treasury wallet shrinking can mean insiders are selling. Wallet data from Ethplorer; labels are only shown where they are well known.</div></div>`;
+  } else if(!["bitcoin","dogecoin","solana","avalanche-2","litecoin","ripple","cardano","bitcoin-cash","stellar"].includes(id)){
+    out+=`<div class="small muted">Big-wallet tracking is not set up for this coin.</div>`;
+  } else out+=`<div class="small muted">Wallet-by-wallet tracking works for Ethereum tokens (like AAVE, UNI, COMP). For ${esc((c.symbol||"").toUpperCase())}, the heavy trading days above are the whale signal.</div>`;
+  return `<section style="display:grid;gap:14px"><h2>Whale and insider moves</h2>${out}</section>`;
+}
+
+/* ---------- market mood: stocks, Fed, Polymarket, options ---------- */
+function moodOf(){
+  const M=S.market; if(!M) return null; const st=Object.fromEntries((M.stocks||[]).map(x=>[x.sym,x])); const r=[];
+  const ndx=st["^NDX"]; if(ndx) r.push(ndx.vs50<0?{m:-1,t:`Nasdaq is ${Math.abs(ndx.vs50).toFixed(1)}% below its 50-day average. Stocks are in a pullback, and crypto often follows.`}:{m:1,t:`Nasdaq is above its 50-day average. Stocks are in an uptrend.`});
+  const vix=st["^VIX"]; if(vix) r.push(vix.last>25?{m:-1,t:`The stock fear index (VIX) is high at ${vix.last.toFixed(1)}. Investors are nervous.`}:vix.last<17?{m:1,t:`The stock fear index (VIX) is calm at ${vix.last.toFixed(1)}.`}:{m:0,t:`The stock fear index (VIX) is normal at ${vix.last.toFixed(1)}.`});
+  const dx=st["DX-Y.NYB"]; if(dx) r.push(dx.m1>1?{m:-1,t:`The US dollar rose ${dx.m1.toFixed(1)}% this month. A stronger dollar is usually a headwind for crypto.`}:dx.m1<-1?{m:1,t:`The US dollar fell ${Math.abs(dx.m1).toFixed(1)}% this month, which usually helps crypto.`}:{m:0,t:`The US dollar is flat this month.`});
+  const fed=(M.poly||[]).find(x=>/^Fed/.test(x.q)); if(fed){ const hike=fed.odds.filter(o=>/Raise|increase|hike/i.test(o[0])).reduce((a,o)=>a+o[1],0), cut=fed.odds.filter(o=>/Cut|decrease/i.test(o[0])).reduce((a,o)=>a+o[1],0);
+    r.push(hike>0.5?{m:-1,t:`Betting markets give a ${(hike*100).toFixed(0)}% chance the Fed raises rates. Higher rates usually hurt risky assets like crypto.`}:cut>0.5?{m:1,t:`Betting markets give a ${(cut*100).toFixed(0)}% chance of a Fed rate cut, which usually helps crypto.`}:{m:0,t:`Betting markets expect the Fed to hold rates.`}); }
+  const o=M.options?.btc; if(o) r.push(o.pcOI>1?{m:-1,t:`More bitcoin puts (bets on falling prices) than calls are open: put/call ${o.pcOI}.`}:o.pcOI<0.7?{m:1,t:`Bitcoin options lean bullish: put/call ${o.pcOI}.`}:{m:0,t:`Bitcoin options are balanced: put/call ${o.pcOI}.`});
+  const ib=st["IBIT"]; if(ib) r.push(ib.m1<-10?{m:-1,t:`The biggest bitcoin ETF fell ${Math.abs(ib.m1).toFixed(0)}% in a month. Big funds have been pulling money out.`}:ib.m1>10?{m:1,t:`The biggest bitcoin ETF rose ${ib.m1.toFixed(0)}% in a month. Big funds are buying.`}:{m:0,t:`Bitcoin ETF prices are steady this month.`});
+  const score=r.reduce((a,x)=>a+x.m,0); const mood=score<=-2?"off":score>=2?"on":"neutral";
+  return {r,score,mood,mult:mood==="off"?0.5:1,label:mood==="off"?"Risk-off":mood==="on"?"Risk-on":"Neutral"};
+}
+function btcNdxCorr(){
+  const M=S.market, b=S.coins.bitcoin; if(!M?.ndx?.length||!b?.closes) return null;
+  const bm=new Map(b.closes.map((v,i)=>[dayKey(b.t0+i*86400),v])); const pts=M.ndx.map(x=>[x.v,bm.get(addDays(x.d,1))]).filter(x=>x[1]); /* CoinGecko's 00:00 UTC price is the previous day's close */
+  const ra=[],rb=[]; for(let i=1;i<pts.length;i++){ ra.push(pts[i][0]/pts[i-1][0]-1); rb.push(pts[i][1]/pts[i-1][1]-1); }
+  if(ra.length<20) return null; const m=a=>a.reduce((x,y)=>x+y,0)/a.length, ma=m(ra), mb=m(rb);
+  let c=0,va=0,vb=0; for(let i=0;i<ra.length;i++){ c+=(ra[i]-ma)*(rb[i]-mb); va+=(ra[i]-ma)**2; vb+=(rb[i]-mb)**2; } return {r:c/Math.sqrt(va*vb),n:ra.length};
+}
+function renderMood(){
+  const el=$("mood"), M=S.market; if(!M){ el.hidden=true; return; } el.hidden=false;
+  const md=moodOf(), cr=btcNdxCorr(), opt=(k,o)=>o?`<div class="panel" style="padding:12px;display:grid;gap:6px;min-width:0"><h3>${k} options</h3>
+      <div class="small"><b class="num">${o.pcOI}</b> put/call ratio <span class="muted">· above 1 means more bets on falling prices than rising</span></div>
+      <div class="small"><b class="num">${o.iv30}%</b> implied volatility <span class="muted">· the yearly swing traders are pricing in; about ${(o.iv30/Math.sqrt(12)).toFixed(0)}% up or down in a month</span></div>
+      <div class="small"><b class="num">${usd(o.maxPain,0)}</b> max pain for ${esc(o.bigExp)} <span class="muted">· the price where most options expire worthless; prices sometimes drift toward it before expiry</span></div>
+      <div class="small"><b class="num">${o.topCalls.map(k=>usd(k,0)).join(", ")}</b> biggest call strikes, <b class="num">${o.topPuts.map(k=>usd(k,0)).join(", ")}</b> biggest put strikes <span class="muted">· levels many traders are watching</span></div></div>`:"";
+  el.innerHTML=`<div class="top"><div><h2>Market mood</h2><div class="small muted">What stocks, the Fed, betting markets and options traders are saying. Updated ${esc(ago(M.asOf))}.</div></div>
+      ${md?`<span class="chip ${md.mood==="off"?"SELL":md.mood==="on"?"BUY":"HOLD"}" style="font-size:13px;padding:5px 12px">${md.label} · ${md.score>0?"+":""}${md.score}</span>`:""}</div>
+    ${md?`<ul class="rules">${md.r.map(x=>`<li><span class="m ${x.m>0?"p":x.m<0?"n":"z"}">${x.m>0?"+1":x.m<0?"−1":"0"}</span><span>${esc(x.t)}</span></li>`).join("")}</ul>
+      <div class="note">${md.mood==="off"?"Because the mood is risk-off, suggested trade sizes on this page are cut in half.":"Trade sizes use your normal risk setting."}${cr?` Over the last ${cr.n} trading days bitcoin moved ${Math.abs(cr.r)>0.5?"closely":Math.abs(cr.r)>0.25?"somewhat":"barely"} with the Nasdaq (correlation ${cr.r.toFixed(2)}, where 1 means in lockstep and 0 means unrelated).`:""}</div>`:""}
+    ${moreBlock("mood","More detail: stocks, options, Polymarket and headlines",`
+    ${(M.stocks||[]).length?"":`<div class="small muted">Stock market data is not available in this version.</div>`}
+    <div class="tbl" ${(M.stocks||[]).length?"":"hidden"}><table><thead><tr><th>Market</th><th class="r">Last</th><th class="r">1 day</th><th class="r">5 days</th><th class="r">1 month</th><th class="r">vs 50-day avg</th></tr></thead><tbody>
+      ${(M.stocks||[]).map(x=>`<tr><td><b>${esc(x.name)}</b> <span class="muted small">${esc(x.sym)}</span></td><td class="r num">${esc((+x.last).toLocaleString("en-US",{maximumFractionDigits:2}))}</td><td class="r num">${pct(x.d1)}</td><td class="r num">${pct(x.d5)}</td><td class="r num">${pct(x.m1)}</td><td class="r num">${pct(x.vs50)}</td></tr>`).join("")}
+    </tbody></table></div>
+    <div class="track-grid" style="grid-template-columns:minmax(0,1fr) minmax(0,1fr)">${opt("Bitcoin",M.options?.btc)}${opt("Ethereum",M.options?.eth)}</div>
+    <div class="track-grid" style="grid-template-columns:minmax(0,1fr) minmax(0,1fr)">
+      <div style="display:grid;gap:10px;min-width:0"><h3>Polymarket odds</h3>
+        ${(M.poly||[]).map(q=>`<div style="display:grid;gap:4px"><a href="${q.url&&q.url.startsWith("https://")?esc(q.url):"#"}" target="_blank" rel="noopener" class="small"><b>${esc(q.q)}</b></a>
+          ${q.odds.map(([l,p])=>`<div style="display:grid;grid-template-columns:minmax(0,1fr) 120px 44px;gap:8px;align-items:center" class="small"><span>${esc(l)}</span><span style="height:6px;border-radius:3px;background:var(--line);overflow:hidden"><span style="display:block;height:100%;width:${(p*100).toFixed(1)}%;background:var(--accent)"></span></span><span class="num r" style="text-align:right">${(p*100).toFixed(p<0.1?1:0)}%</span></div>`).join("")}</div>`).join("")}
+        <div class="small muted">Prices on Polymarket are bets with real money; 56% means bettors see roughly a 56% chance. Shown for information only.</div></div>
+      <div style="display:grid;gap:10px;min-width:0"><h3>Coming up</h3>
+        ${(M.events||[]).map(e=>`<div class="small"><b class="num">${esc(e.d)}</b> · ${esc(e.t)}</div>`).join("")}
+        <h3 style="margin-top:6px">Headlines</h3>
+        ${(M.news||[]).map(n=>`<div class="small"><a href="${String(n[2]).startsWith("https://")?esc(n[2]):"#"}" target="_blank" rel="noopener">${esc(n[0])}</a> <span class="muted">· ${esc(n[1])}, ${esc(String(n[3]).slice(5,10))}</span></div>`).join("")}
+      </div></div>`)}`;
+  bindMore(el);
+}
+
+/* ---------- rendering ---------- */
+function spark(c){
+  const a=(c.closes||[]).slice(-30); if(a.length<2) return "";
+  const mn=Math.min(...a), mx=Math.max(...a), w=64, h=24; const pts=a.map((v,i)=>`${(i/(a.length-1)*w).toFixed(1)},${(h-2-(v-mn)/(mx-mn||1)*(h-4)).toFixed(1)}`).join(" ");
+  const col=a[a.length-1]>=a[0]?"var(--buy)":"var(--sell)";
+  return `<svg viewBox="0 0 ${w} ${h}" width="${w}" height="${h}" aria-hidden="true"><polyline points="${pts}" fill="none" stroke="${col}" stroke-width="1.5"/></svg>`;
+}
+function renderStatus(){
+  const times=S.watch.map(id=>S.coins[id]?.updatedAt).filter(Boolean).sort(); const oldest=times[0];
+  let html=`<span class="dot ${S.auto?"live":""}"></span><span class="small muted">${S.dbState==="ok"?`Prices updated ${esc(ago(oldest))}`:S.dbState==="loading"?"Loading saved data…":"Saved data unavailable"}</span>`;
+  if(S.host||S.mcp) html+=`<button class="primary" id="refresh" ${S.busy?"disabled":""}>${S.busy?"Refreshing…":"Refresh live data"}</button>`;
+  else if(S.dbState==="ok") html+=`<span class="small muted" title="The page fetches prices through Claude's built-in browser, which only the Claude desktop app has.">Open in the Claude desktop app to refresh</span>`;
+  $("status").innerHTML=html;
+  const b=$("refresh"); if(b) b.onclick=()=>{ startAuto(); refreshLive(); };
+}
+function renderBanner(){
+  let h="";
+  if(S.dbState==="none") h=`<div class="banner err">Saved data could not load. Sign in to claude.ai and open this page there to see your watchlist and trades.</div>`;
+  else if(S.dbState==="timeout") h=`<div class="banner err">Saved data is taking too long to load. Reload the page to try again.</div>`;
+  else if(S.dbState==="error") h=`<div class="banner err">Saved data could not load: ${esc(S.dbErr)}</div>`;
+  if(S.err) h+=`<div class="banner err">${esc(S.err)} <button class="linkbtn" id="dismiss">Dismiss</button></div>`;
+  else if(S.msg) h+=`<div class="banner">${esc(S.msg)}</div>`;
+  $("banner").innerHTML=h; const d=$("dismiss"); if(d) d.onclick=()=>{S.err="";render();};
+}
+function renderStrip(B){
+  $("strip").innerHTML=`
+    <div><span class="label">Portfolio value</span><span class="v">${usd(B.total,2)}</span><span class="small">${pct(B.pnlPct,2)} <span class="muted">since start</span></span></div>
+    <div><span class="label">Profit / loss</span><span class="v ${B.pnl>=0?"up":"down"}">${B.pnl>=0?"+":""}${usd(B.pnl,2)}</span><span class="small muted">realized ${usd(B.realized,2)}</span></div>
+    <div><span class="label">Cash left</span><span class="v">${usd(B.cash,2)}</span><span class="small muted">of ${usd(B.budget,2)} start</span></div>
+    <div><span class="label">In coins</span><span class="v">${usd(B.value,2)}</span><span class="small muted">cost ${usd(B.cost,2)}</span></div>
+    <div><span class="label">Fees paid</span><span class="v">${usd(B.fees,2)}</span><span class="small muted">${S.trades.length} trade${S.trades.length===1?"":"s"}</span></div>`;
+}
+function renderRail(B){
+  if(!S.watchLoaded && S.dbState!=="none"){ return; }
+  const rows=S.watch.map(id=>{ const c=S.coins[id]; const an=c&&analyze(c); const held=B.per[id];
+    return `<div class="row ${S.sel===id?"sel":""}" data-id="${esc(id)}" tabindex="0" role="button" aria-label="Show ${esc(c?.name||id)}">
+      <div class="nm"><div><b>${esc((c?.symbol||id).toUpperCase())}</b> <span class="muted small">${esc(c?.name||"waiting for data")}</span></div>
+        <div class="px num">${c?usd(c.price):"–"} ${c?pct(c.ch24):""}</div>
+        ${held?`<div class="small muted">You hold ${usd(held.value,2)}</div>`:""}</div>
+      <div>${c?spark(c):""}</div>
+      <div style="display:grid;justify-items:end;gap:4px">${an?`<span class="chip ${an.signal}">${SIGWORD[an.signal]}</span>`:""}<button class="x" data-rm="${esc(id)}" aria-label="Remove ${esc(id)}" title="Remove from watchlist">✕</button></div>
+    </div>`; }).join("");
+  const quick=QUICK.filter(([id])=>!S.watch.includes(id)).map(([id,s])=>`<button data-add="${id}">+ ${s}</button>`).join("");
+  const res=S.search.map(c=>`<button data-add="${esc(c.id)}"><b>${esc(String(c.symbol||"").toUpperCase())}</b> ${esc(c.name)} <span class="muted small">${c.market_cap_rank?"#"+esc(c.market_cap_rank):""}</span></button>`).join("");
+  $("rail").innerHTML=`<div class="rail-head"><h2>Watchlist</h2><span class="small muted">${S.watch.length} coins</span></div>
+    ${rows||'<div class="empty">Your watchlist is empty. Add a coin below.</div>'}
+    <div class="add">
+      <form id="addf"><input id="addq" placeholder="${S.host?"Search coins, e.g. solana":"CoinGecko id, e.g. solana"}" aria-label="Add a coin"><button ${S.searching?"disabled":""}>${S.searching?"…":"Add"}</button></form>
+      ${res?`<div class="results">${res}</div>`:""}
+      <div class="quick" aria-label="Popular coins on Coinbase">${quick}</div>
+    </div>`;
+  $("rail").querySelectorAll(".row").forEach(r=>{ const go=()=>{S.sel=r.dataset.id;render();}; r.onclick=e=>{ if(e.target.closest("[data-rm]")) return; go(); }; r.onkeydown=e=>{ if(e.key==="Enter"||e.key===" "){e.preventDefault();go();} }; });
+  $("rail").querySelectorAll("[data-rm]").forEach(b=>b.onclick=()=>removeCoin(b.dataset.rm));
+  $("rail").querySelectorAll("[data-add]").forEach(b=>b.onclick=()=>addCoin(b.dataset.add));
+  $("addf").onsubmit=e=>{e.preventDefault(); searchCoins($("addq").value);};
+}
+function niceTicks(mn,mx,count=4){ const span=mx-mn||1, step0=span/count, mag=10**Math.floor(Math.log10(step0)); const step=[1,2,2.5,5,10].map(x=>x*mag).find(x=>x>=step0);
+  const out=[]; for(let v=Math.ceil(mn/step)*step; v<=mx+1e-9; v+=step) out.push(v); return out; }
+function chartSVG(c,an){
+  const n=an.a.length, R=Math.min(S.range,n), from=n-R, W=800, H=280, pl=6, pr=70, pt=10, pb=24;
+  const slice=arr=>arr.slice(from);
+  const pa=slice(an.a), s20=slice(an.s20), s50=slice(an.s50), s200=slice(an.s200);
+  const all=[...pa,...s20,...s50,...(R>=120?s200:[])].filter(v=>v!=null); let mn=Math.min(...all), mx=Math.max(...all); const padv=(mx-mn)*.06; mn-=padv; mx+=padv;
+  const x=i=>pl+i/(R-1)*(W-pl-pr), y=v=>pt+(1-(v-mn)/(mx-mn))*(H-pt-pb);
+  const path=arr=>{ let d="",on=false; arr.forEach((v,i)=>{ if(v==null){on=false;return;} d+=(on?"L":"M")+x(i).toFixed(1)+","+y(v).toFixed(1); on=true; }); return d; };
+  const ticks=niceTicks(mn,mx,4);
+  const grid=ticks.map(t=>`<line x1="${pl}" x2="${W-pr}" y1="${y(t)}" y2="${y(t)}" stroke="var(--line)" stroke-width="1"/><text x="${W-pr+8}" y="${y(t)+4}" font-size="11" fill="var(--muted)" font-family="var(--f-mono)">${esc(usd(t))}</text>`).join("");
+  const xl=[0,Math.floor((R-1)/3),Math.floor(2*(R-1)/3),R-1].map((i,k)=>`<text x="${x(i)}" y="${H-6}" font-size="11" fill="var(--muted)" text-anchor="${k===0?"start":k===3?"end":"middle"}">${esc(fmtDate(c.t0+(from+i)*86400))}</text>`).join("");
+  const area=path(pa)+`L${x(R-1)},${H-pb}L${x(0)},${H-pb}Z`;
+  const last=pa[R-1];
+  // RSI panel
+  const rr=slice(an.r), RH=90, ry=v=>6+(1-v/100)*(RH-24);
+  const rsiPath=(()=>{ let d="",on=false; rr.forEach((v,i)=>{ if(v==null){on=false;return;} d+=(on?"L":"M")+x(i).toFixed(1)+","+ry(v).toFixed(1); on=true;}); return d; })();
+  return `<div class="chart" id="chart">
+    <svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${esc(c.name)} price chart, last ${R} days">
+      ${grid}
+      <path d="${area}" fill="var(--accent)" opacity=".07"/>
+      ${R>=120?`<path d="${path(s200)}" fill="none" stroke="var(--sma200)" stroke-width="1.5" stroke-dasharray="4 4"/>`:""}
+      <path d="${path(s50)}" fill="none" stroke="var(--sma50)" stroke-width="1.5"/>
+      <path d="${path(s20)}" fill="none" stroke="var(--sma20)" stroke-width="1.5" opacity=".8"/>
+      <path d="${path(pa)}" fill="none" stroke="var(--fg)" stroke-width="2"/>
+      <circle cx="${x(R-1)}" cy="${y(last)}" r="4" fill="var(--fg)"/>
+      ${xl}
+      <line id="cx" x1="0" x2="0" y1="${pt}" y2="${H-pb}" stroke="var(--muted)" stroke-width="1" opacity="0"/>
+      <rect id="hov" x="${pl}" y="${pt}" width="${W-pl-pr}" height="${H-pt-pb}" fill="transparent"/>
+    </svg>
+    <div class="tip" id="tip" hidden></div>
+  </div>
+  <div class="legend"><span><i style="background:var(--fg)"></i>Price</span><span><i style="background:var(--sma20)"></i>20-day avg</span><span><i style="background:var(--sma50)"></i>50-day avg</span>${R>=120?`<span><i style="background:var(--sma200)"></i>200-day avg</span>`:""}</div>
+  <div>
+    <div class="label" style="margin-bottom:4px">RSI (14 days) · ${an.rsi.toFixed(0)}</div>
+    <svg viewBox="0 0 ${W} ${RH}" style="display:block;width:100%;height:auto" aria-label="RSI chart">
+      <rect x="${pl}" y="${ry(70)}" width="${W-pl-pr}" height="${ry(30)-ry(70)}" fill="var(--panel-2)"/>
+      ${[30,50,70].map(v=>`<line x1="${pl}" x2="${W-pr}" y1="${ry(v)}" y2="${ry(v)}" stroke="var(--line)"/><text x="${W-pr+8}" y="${ry(v)+4}" font-size="11" fill="var(--muted)" font-family="var(--f-mono)">${v}</text>`).join("")}
+      <path d="${rsiPath}" fill="none" stroke="var(--accent)" stroke-width="1.5"/>
+    </svg>
+  </div>`;
+}
+function bindChart(c,an){
+  const svg=document.querySelector("#chart svg"), hov=$("hov"), tip=$("tip"), cx=$("cx"); if(!svg) return;
+  const n=an.a.length, R=Math.min(S.range,n), from=n-R, W=800, pl=6, pr=70;
+  hov.onmousemove=e=>{ const b=svg.getBoundingClientRect(); const sx=(e.clientX-b.left)/b.width*W; const i=Math.max(0,Math.min(R-1,Math.round((sx-pl)/(W-pl-pr)*(R-1))));
+    const xx=pl+i/(R-1)*(W-pl-pr); cx.setAttribute("x1",xx); cx.setAttribute("x2",xx); cx.setAttribute("opacity",".6");
+    tip.hidden=false; tip.style.left=(xx/W*b.width)+"px"; tip.style.top="18px";
+    tip.textContent=`${fmtDate(c.t0+(from+i)*86400)}  ${usd(an.a[from+i])}`; };
+  hov.onmouseleave=()=>{ tip.hidden=true; cx.setAttribute("opacity","0"); };
+}
+function renderDetail(B){
+  const el=$("detail"); const id=S.sel; const c=id&&S.coins[id];
+  if(!id){ el.innerHTML=`<div class="empty">Add a coin to your watchlist to see its analysis.</div>`; return; }
+  if(!c){ el.innerHTML=`<div class="empty">No data yet for “${esc(id)}”. ${S.host?"Click Refresh live data to load it.":"It loads the next time prices are refreshed from the Claude desktop app."}</div>`; return; }
+  const an=analyze(c);
+  const st=S.settings, risk=(+st.budget||0)*(+st.riskPct||0)/100;
+  let plan="", mcHTML="";
+  if(an){
+    const mood=moodOf(), size=Math.max(0,Math.min(risk*(mood?.mult??1)/an.stopPct,(+st.budget||0)*0.3,B.cash));
+    const stop=an.p*(1-an.stopPct), target=an.p*(1+2*an.stopPct), fee=size*(+st.feePct||0)/100*2;
+    plan=`<div><h3 style="margin-bottom:8px">${an.signal==="BUY"?"If you buy":"If you buy anyway"}</h3>
+    <div class="plan">
+      <div><span class="label">Suggested size</span><span class="v">${usd(size,2)}</span><span class="small muted">risking ${st.riskPct}% of start${mood?.mult<1?", halved for risk-off market":""}</span></div>
+      <div><span class="label">Stop-loss</span><span class="v">${usd(stop)}</span><span class="small muted">${(an.stopPct*100).toFixed(1)}% below now</span></div>
+      <div><span class="label">Take-profit</span><span class="v">${usd(target)}</span><span class="small muted">2× the stop distance</span></div>
+      <div><span class="label">Worst case at stop</span><span class="v down">−${usd(size*an.stopPct+fee,2)}</span><span class="small muted">incl. ~${usd(fee,2)} fees</span></div>
+      <div class="wide small muted">The stop sits about twice the coin's average daily move (${(an.move14*100).toFixed(1)}% over 14 days) below the price, so normal wiggles don't trigger it. Size is set so hitting the stop costs about ${usd(risk,2)}. ${size>=B.cash-0.005?"Capped by the cash you have left.":""} Fees are an estimate at ${st.feePct}% each way; Coinbase shows the real fee before you confirm.</div>
+    </div></div>`;
+    { const I=ideaFor(id,B); if(I&&(I.type==="long"||I.type==="short")) plan=levPlan(I); }
+    mcHTML=`<div><h3 style="margin-bottom:8px">What could happen next</h3>${(()=>{ const mc=monteCarlo(id,an); return `<div class="wide" style="display:grid;gap:8px">
+        <span class="label">Simulation · ${mc.N.toLocaleString("en-US")} possible next ${mc.days} days</span>
+        ${mcSVG(mc,an.p)}
+        <span class="small">Built by replaying random days from the past year's real price moves. Half the paths ended above ${usd(an.p*mc.p50)}, and 90% ended between ${usd(an.p*mc.p5)} and ${usd(an.p*mc.p95)}. Price finished higher than today in ${(mc.up*100).toFixed(0)}% of paths. With this plan the target was reached first in ${(mc.pT*100).toFixed(0)}% of paths and the stop-loss in ${(mc.pS*100).toFixed(0)}%. For ${usd(size,2)} in, the middle outcome is ${usd(size*mc.p50,2)} and a bad case (worst 5%, without a stop) is ${usd(size*mc.p5,2)}.</span>
+        <span class="small muted">The past year's moves are not a forecast; crashes and rallies bigger than last year's can happen.</span></div>`; })()}</div>`;
+  }
+  const meter=an?Array.from({length:13},(_,k)=>{ const v=k-6; const on=an.score>=0?(v>0&&v<=an.score):(v<0&&v>=an.score); const col=v>0?"var(--buy)":v<0?"var(--sell)":"var(--muted)"; return `<span style="${on||v===0?`background:${col}`:""}"></span>`; }).join(""):"";
+  const held=B.per[id];
+  el.innerHTML=`
+    <div class="dhead">
+      <div><div class="label">${esc(c.name)} · ${esc((c.symbol||"").toUpperCase())}${c.rank?` · rank #${esc(c.rank)}`:""}</div>
+        <div class="price">${usd(c.price)}</div>
+        <div class="small">${pct(c.ch24,2)} <span class="muted">24h</span> · ${pct(c.ch7)} <span class="muted">7d</span> · ${pct(c.ch30)} <span class="muted">30d</span></div></div>
+      <div class="ranges" role="group" aria-label="Chart range">${[[30,"1M"],[90,"3M"],[180,"6M"],[366,"1Y"]].map(([d,l])=>`<button data-r="${d}" class="${S.range===d?"on":""}">${l}</button>`).join("")}</div>
+    </div>
+    ${an?`<section class="signal" aria-label="Automated signal">
+      <div class="sigbig"><span class="label">Automated signal</span><span class="word ${an.signal}">${SIGWORD[an.signal]}</span>
+        <div class="meter" aria-label="Score ${an.score} of ${an.rules.length}">${meter}</div>
+        <span class="small muted">Score ${an.score>0?"+":""}${an.score} out of ±${an.rules.length}. Buy at +2 or more, sell or avoid at −2 or less.</span>
+        ${held?`<span class="small">You hold ${qty(held.qty)} ${esc((c.symbol||"").toUpperCase())}, worth ${usd(held.value,2)} (${pct((held.value-held.cost)/held.cost*100)}).</span>`:""}</div>
+      <div style="display:grid;gap:10px;min-width:0"><ul class="rules">${an.rules.map(r=>`<li><span class="m ${r.m>0?"p":r.m<0?"n":"z"}">${r.m>0?"+1":r.m<0?"−1":"0"}</span><span>${esc(r.t)}</span></li>`).join("")}</ul>
+        ${an.note?`<div class="note">${esc(an.note)}</div>`:""}
+        <div class="note">Automated indicator from past prices, not financial advice.</div></div>
+    </section>`:""}
+    ${plan}
+    ${an?chartSVG(c,an):`<div class="empty">Not enough price history yet to chart this coin.</div>`}
+    <div><h3 style="margin-bottom:10px">Key stats</h3><div class="stats">
+      <div><span class="label">Market cap</span><span class="v">${big(c.mcap)}</span></div>
+      <div><span class="label">24h volume</span><span class="v">${big(c.vol)}</span></div>
+      <div><span class="label">24h range</span><span class="v">${usd(c.low24)} – ${usd(c.high24)}</span></div>
+      <div><span class="label">Volatility (30d, yearly)</span><span class="v">${an?an.vol.toFixed(0)+"%":"–"}</span></div>
+      <div><span class="label">Circulating supply</span><span class="v">${supply(c.circ)}</span></div>
+      <div><span class="label">Max supply</span><span class="v">${supply(c.max)}</span></div>
+      <div><span class="label">1-year high / low</span><span class="v">${an?usd(an.hi)+" / "+usd(an.lo):"–"}</span></div>
+      <div><span class="label">All-time high</span><span class="v">${usd(c.ath)} <span class="small">${c.ath?pct((c.price/c.ath-1)*100,0):""}</span></span></div>
+    </div></div>
+    ${moreBlock("coin","More detail: simulation, whales and insiders",mcHTML+whaleHTML(id,c,an))}
+    <div class="small muted">Data from CoinGecko, updated ${esc(ago(c.updatedAt))}.</div>`;
+  bindMore(el);
+  el.querySelectorAll("[data-r]").forEach(b=>b.onclick=()=>{S.range=+b.dataset.r;render();});
+  if(an) bindChart(c,an);
+}
+function renderTrack(B){
+  const el=$("track"); const F=S.form; const st=S.settings;
+  const sel=S.watch.includes(F.coin)?F.coin:(S.sel||S.watch[0]||"");
+  const pc=S.coins[sel]?.price;
+  const opts=S.watch.map(id=>`<option value="${esc(id)}" ${id===sel?"selected":""}>${esc((S.coins[id]?.symbol||id).toUpperCase())} · ${esc(S.coins[id]?.name||id)}</option>`).join("");
+  const lots=B.open.map(l=>{ const c=S.coins[l.coin]; const px=c?.price; const val=px?l.qty*px:null; const held=daysBetween(l.date,today()); const free=addDays(l.date,366);
+    return `<tr><td><b>${esc((c?.symbol||l.coin).toUpperCase())}</b></td><td>${esc(l.date)}</td><td class="r num">${qty(l.qty)}</td><td class="r num">${usd(l.price)}</td><td class="r num">${usd(l.cost,2)}</td><td class="r num">${usd(val,2)}</td><td class="r num">${val!=null?pct((val-l.cost)/l.cost*100):"–"}</td>
+      <td>${held>365?`<span class="chip BUY">Tax-free</span>`:`<span class="small">${esc(free)} <span class="muted">(${366-held} days)</span></span>`}</td></tr>`; }).join("");
+  const hist=S.trades.slice().sort((x,y)=>(y.date||"").localeCompare(x.date||"")||(y.createdAt||0)-(x.createdAt||0)).map(t=>{ const c=S.coins[t.coin];
+    return `<tr><td>${esc(t.date)}</td><td><span class="chip ${t.side==="buy"?"BUY":"SELL"}">${t.side==="buy"?"Buy":"Sell"}</span></td><td><b>${esc((c?.symbol||t.coin).toUpperCase())}</b></td><td class="r num">${usd(+t.usd,2)}</td><td class="r num">${usd(+t.price)}</td><td class="r num">${usd(+t.fee||0,2)}</td><td class="muted">${esc(t.note||"")}</td>
+      <td class="r">${S.confirmDel===t.id?`<button data-delyes="${esc(t.id)}">Delete</button> <button data-delno="1">Keep</button>`:`<button class="linkbtn" data-del="${esc(t.id)}">Delete</button>`}</td></tr>`; }).join("");
+  const real=B.closed.length?`<div class="small muted">Closed so far: ${B.closed.length} lot${B.closed.length===1?"":"s"}, ${usd(B.closed.filter(x=>x.held<=365).reduce((a,b)=>a+b.gain,0),2)} short-term (held one year or less, taxable unless your yearly total stays under €1,000) and ${usd(B.closed.filter(x=>x.held>365).reduce((a,b)=>a+b.gain,0),2)} long-term (tax-free in Germany).</div>`:"";
+  el.innerHTML=`
+    <div class="top"><div><h2>The $100 tracker</h2><div class="small muted">Enter each trade you make on your exchange. Nothing here connects to your account.</div></div>
+      <div class="settings">
+        <label>Start amount ($)<input id="s-budget" type="number" min="0" step="1" value="${esc(st.budget)}"></label>
+        <label>Risk per trade (%)<input id="s-risk" type="number" min="0.5" max="10" step="0.5" value="${esc(st.riskPct)}"></label>
+        <label>Fee estimate (%)<input id="s-fee" type="number" min="0" max="5" step="0.1" value="${esc(st.feePct)}"></label>
+      </div></div>
+    ${B.warn.map(w=>`<div class="banner err">${esc(w)}</div>`).join("")}
+    <div class="track-grid">
+      <form class="tform panel" id="tf" style="padding:14px">
+        <div class="full seg" role="group" aria-label="Buy or sell"><button type="button" class="buy ${S.side==="buy"?"on":""}" data-side="buy">Buy</button><button type="button" class="sell ${S.side==="sell"?"on":""}" data-side="sell">Sell</button></div>
+        <label class="full">Coin<select id="t-coin">${opts}</select></label>
+        <label>Date<input id="t-date" type="date" value="${esc(F.date||today())}" max="${today()}"></label>
+        <label>Amount ($)<input id="t-usd" type="number" min="0" step="0.01" placeholder="25.00" value="${esc(F.usd||"")}"></label>
+        <label>Price per coin ($)<input id="t-price" type="number" min="0" step="any" placeholder="${pc?esc(+pc):""}" value="${esc(F.price||"")}"></label>
+        <label>Fee ($)<input id="t-fee" type="number" min="0" step="0.01" placeholder="0.00" value="${esc(F.fee||"")}"></label>
+        <label class="full">Note (optional)<input id="t-note" maxlength="80" placeholder="Why I made this trade" value="${esc(F.note||"")}"></label>
+        <div class="full small muted" id="t-help">${S.side==="buy"?`Amount is what you spent before fees. Leave price empty to use today's ${pc?usd(pc):""}.`:"Amount is what you received before fees."}</div>
+        <button class="primary full" ${S.db&&S.watch.length?"":"disabled"}>Save ${S.side==="buy"?"buy":"sale"}</button>
+      </form>
+      <div style="display:grid;gap:16px;min-width:0">
+        <div><h3 style="margin-bottom:6px">Open positions</h3>
+          ${lots?`<div class="tbl"><table><thead><tr><th>Coin</th><th>Bought</th><th class="r">Amount</th><th class="r">Buy price</th><th class="r">Cost</th><th class="r">Value now</th><th class="r">Gain</th><th>Tax-free from</th></tr></thead><tbody>${lots}</tbody></table></div>`
+            :`<div class="empty">No open positions yet. When you buy on Coinbase, enter the trade on the left and it shows up here with its live value.</div>`}
+          <div class="small muted" style="margin-top:6px">Germany: crypto sold after holding it more than one year is tax-free. Gains on coins held a year or less are tax-free only while your total for the year stays under €1,000. Each buy is tracked separately, first in first out. Not tax advice.</div>
+        </div>
+        ${real}
+        <div><h3 style="margin-bottom:6px">Trade history</h3>
+          ${hist?`<div class="tbl"><table><thead><tr><th>Date</th><th>Side</th><th>Coin</th><th class="r">Amount</th><th class="r">Price</th><th class="r">Fee</th><th>Note</th><th></th></tr></thead><tbody>${hist}</tbody></table></div>`:`<div class="empty">No trades yet.</div>`}
+        </div>
+      </div>
+    </div>`;
+  el.querySelectorAll("[data-side]").forEach(b=>b.onclick=()=>{ keepForm(); S.side=b.dataset.side; render(); });
+  $("t-coin").onchange=()=>{ keepForm(); render(); };
+  $("tf").onsubmit=saveTrade;
+  const saveSet=()=>{ if(!S.db) return; const v={budget:+$("s-budget").value||0,riskPct:+$("s-risk").value||2,feePct:+$("s-fee").value||0}; S.db.doc("config/settings").set(v); };
+  ["s-budget","s-risk","s-fee"].forEach(i=>$(i).onchange=saveSet);
+  el.querySelectorAll("[data-del]").forEach(b=>b.onclick=()=>{S.confirmDel=b.dataset.del;render();});
+  el.querySelectorAll("[data-delno]").forEach(b=>b.onclick=()=>{S.confirmDel=null;render();});
+  el.querySelectorAll("[data-delyes]").forEach(b=>b.onclick=async()=>{ await S.db.doc("trades/"+b.dataset.delyes).delete(); S.confirmDel=null; });
+}
+function keepForm(){ const g=i=>$(i)?.value; S.form={coin:g("t-coin"),date:g("t-date"),usd:g("t-usd"),price:g("t-price"),fee:g("t-fee"),note:g("t-note")}; }
+async function saveTrade(e){
+  e.preventDefault(); keepForm(); const F=S.form; const usdAmt=+F.usd, price=+F.price||S.coins[F.coin]?.price, fee=+F.fee||0;
+  if(!F.coin){ S.err="Pick a coin first."; return render(); }
+  if(!(usdAmt>0)){ S.err="Enter the dollar amount of the trade."; return render(); }
+  if(!(price>0)){ S.err="Enter the price per coin you got on Coinbase."; return render(); }
+  if(S.side==="buy" && usdAmt+fee>book().cash+0.005){ S.err=`That buy is more than your cash left (${usd(book().cash,2)}). Raise the start amount if you added money.`; }
+  try{
+    await S.db.collection("trades").add({side:S.side,coin:F.coin,date:F.date||today(),usd:usdAmt,price,fee,qty:usdAmt/price,note:(F.note||"").slice(0,80),createdAt:Date.now()});
+    S.form={coin:F.coin}; S.msg="Trade saved."; setTimeout(()=>{ if(S.msg==="Trade saved."){S.msg="";render();} },2500); render();
+  }catch(err){ S.err="The trade could not be saved: "+(err?.message||"unknown error"); render(); }
+}
+function render(){
+  const B=book(); renderTabs(); renderStatus(); renderBanner(); renderStrip(B); renderMood(); renderIdeas(B); renderRail(B); renderDetail(B);
+  const a=document.activeElement, keepId=a&&a.id&&$("track").contains(a)?a.id:null; renderTrack(B); if(keepId&&$(keepId)) $(keepId).focus();
+  const open=[...document.querySelectorAll("#lab details")].map(d=>d.open); renderLab(); document.querySelectorAll("#lab details").forEach((d,i)=>{ if(open[i]) d.open=true; });
+  paperCatchUp(); paperLiveCheck();
+}
+
+/* ---------- boot ---------- */
+render();
+(async()=>{
+  const timer=setTimeout(()=>{ if(S.dbState==="loading"){ S.dbState="timeout"; render(); } },10000);
+  const db=window.claude?.use ? await window.claude.use("db").catch(()=>null) : null;
+  if(!db){ clearTimeout(timer); S.dbState="none"; render(); return; }
+  S.db=db;
+  db.collection("coins").onSnapshot(snap=>{ clearTimeout(timer); S.dbState="ok"; const m={}; snap.docs.forEach(d=>m[d.id]=d.data()); S.coins=m; render(); },
+    e=>{ clearTimeout(timer); S.dbState="error"; S.dbErr=e?.message||"unknown error"; render(); });
+  db.doc("config/watchlist").onSnapshot(d=>{ S.watch=(d.exists&&d.data().ids)||[]; S.watchLoaded=true; if(!S.sel||!S.watch.includes(S.sel)) S.sel=S.watch[0]||null; render(); });
+  db.doc("config/settings").onSnapshot(d=>{ if(d.exists) Object.assign(S.settings,d.data()); render(); });
+  db.doc("market/today").onSnapshot(d=>{ S.market=d.exists?d.data():null; render(); });
+  db.collection("holders").onSnapshot(s=>{ const m={}; s.docs.forEach(d=>m[d.id]=d.data()); S.holders=m; render(); });
+  db.doc("paper/state").onSnapshot(d=>{ S.paper=d.exists?d.data():null; S.paperLoaded=true; render(); });
+  db.collection("trades").onSnapshot(s=>{ S.trades=s.docs.map(d=>({id:d.id,...d.data()})); render(); });
+  const mcp=window.claude?.use ? await window.claude.use("mcp").catch(()=>null) : null;
+  if(mcp){ S.mcp=mcp; try{ const l=await mcp.listTools(HOST); S.host=(l.servers||[]).some(s=>s.server===HOST); }catch{ S.host=false; } render(); }
+})();
+</script>
+<script>
+/* Standalone extras: auto-refresh, whale wallets, options, Polymarket, backup. */
+(function(){
+  const ERC20={aave:"0x7fc66500c84a76ad7e9c93437bfc5ac33e2ddae9",uniswap:"0x1f9840a85d5af5bf1d1762f925bdaddc4201f984","compound-governance-token":"0xc00e94cb662c3520282e6f5717214004a7f26888",chainlink:"0x514910771af9ca656af840dff83e8264ecf986ca","lido-dao":"0x5a98fcbea516cf06857215779fd812ca3bef1b32",maker:"0x9f8f72aa9304c8b593d555f12ef6589cc3a579a2","curve-dao-token":"0xd533a949740bb3306d119cc777fa900ba034cd52","the-graph":"0xc944e90c64b2c07662a292be6244bdf05cda44a7","shiba-inu":"0x95ad61b0a150d79219dcf64e1e6cc01f0b64c4ce",pepe:"0x6982508145454ce325ddecf3a1a1aa6b4cbbe7f3","ondo-finance":"0xfaba6f8e4a5e8ab82f62fe7c39859fa577269be3",ethena:"0x57e114b691db790c35207b2e685d4a43181e6061"};
+  const J=async u=>{ const r=await fetch(u); if(!r.ok) throw new Error(u.split("/")[2]+" answered "+r.status); return r.json(); };
+  const store=window.__desk.store, db=window.__desk.db, todayKey=()=>new Date().toISOString().slice(0,10);
+  async function holders(){
+    for(const id of S.watch){ const c=ERC20[id]; if(!c) continue; const cur=store["holders/"+id]; if(cur?.snaps?.at(-1)?.d===todayKey()) continue;
+      try{ const j=await J(`https://api.ethplorer.io/getTopTokenHolders/${c}?apiKey=freekey&limit=25`); if(!j.holders) continue;
+        const snap={d:todayKey(),h:j.holders.map(h=>({a:h.address,s:+(+h.share).toFixed(3)}))}; const doc=cur||{coin:id,contract:c,source:"Ethplorer",snaps:[]};
+        doc.snaps=[...doc.snaps,snap].slice(-60); await db.doc("holders/"+id).set(doc); await new Promise(r=>setTimeout(r,1200)); }catch(e){ console.warn("holders",id,e); } }
+  }
+  function optSummary(r){
+    const mo={JAN:0,FEB:1,MAR:2,APR:3,MAY:4,JUN:5,JUL:6,AUG:7,SEP:8,OCT:9,NOV:10,DEC:11};
+    const rows=r.map(x=>{const [,e,k,t]=x.instrument_name.split('-');return{e,exp:Date.UTC(2000+ +e.slice(-2),mo[e.slice(-5,-2)],+e.slice(0,-5),8),k:+k,t,oi:x.open_interest,vol:x.volume_usd||0,iv:x.mark_iv,u:x.underlying_price};});
+    const now=Date.now(),sum=(a,f)=>a.reduce((s,x)=>s+f(x),0),calls=rows.filter(x=>x.t==='C'),puts=rows.filter(x=>x.t==='P'),byExp={};rows.forEach(x=>{(byExp[x.e]||=[]).push(x)});
+    const exps=Object.entries(byExp).map(([e,a])=>({e,exp:a[0].exp,oi:sum(a,x=>x.oi)})).filter(x=>x.exp>now);
+    const big=exps.filter(x=>x.exp-now>3*864e5).sort((a,b)=>b.oi-a.oi)[0]; const n30=exps.reduce((b,x)=>Math.abs(x.exp-now-30*864e5)<Math.abs(b.exp-now-30*864e5)?x:b,exps[0]);
+    const atm=a=>{const s=a.slice().sort((x,y)=>Math.abs(x.k-x.u)-Math.abs(y.k-y.u)).slice(0,4);return s.reduce((m,x)=>m+x.iv,0)/s.length;};
+    const pain=e=>{const a=byExp[e];let best=null;for(const K of new Set(a.map(x=>x.k))){const p=sum(a,x=>x.t==='C'?x.oi*Math.max(0,K-x.k):x.oi*Math.max(0,x.k-K));if(!best||p<best.p)best={K,p};}return best.K;};
+    const top=t=>{const m={};rows.filter(x=>x.t===t).forEach(x=>m[x.k]=(m[x.k]||0)+x.oi);return Object.entries(m).sort((a,b)=>b[1]-a[1]).slice(0,3).map(([k])=>+k);};
+    return {spot:Math.round(rows[0].u),pcOI:+(sum(puts,x=>x.oi)/sum(calls,x=>x.oi)).toFixed(2),pcVol:+(sum(puts,x=>x.vol)/Math.max(1,sum(calls,x=>x.vol))).toFixed(2),iv30:+atm(byExp[n30.e]).toFixed(1),iv30exp:n30.e,bigExp:big.e,maxPain:pain(big.e),topCalls:top('C'),topPuts:top('P'),exp:big.exp};
+  }
+  const odds=e=>(e.markets||[]).filter(m=>!m.closed).map(m=>[m.groupItemTitle||m.question,+(+JSON.parse(m.outcomePrices||"[0]")[0]).toFixed(3)]);
+  const nice=([l,p])=>[String(l).replace(/^↓\s*/,"Down to $").replace(/^↑\s*/,"Up to $"),p];
+  async function market(){
+    const cur=store["market/today"]; if(cur?.asOf&&Date.now()-new Date(cur.asOf).getTime()<3*3600e3) return;
+    const M={asOf:new Date().toISOString(),stocks:[],options:{},poly:[],events:[],news:[]};
+    for(const [k,c] of [["btc","BTC"],["eth","ETH"]]){ try{ const j=await J(`https://www.deribit.com/api/v2/public/get_book_summary_by_currency?currency=${c}&kind=option`); M.options[k]=optSummary(j.result); }catch(e){ console.warn("options",e); } }
+    if(M.options.btc) M.events.push({d:new Date(M.options.btc.exp).toISOString().slice(0,10),t:"Big BTC and ETH options expiry on Deribit"});
+    try{ const all=await J("https://gamma-api.polymarket.com/events?active=true&closed=false&limit=200&order=volume24hr&ascending=false");
+      const cr=await J("https://gamma-api.polymarket.com/events?active=true&closed=false&limit=100&order=volume24hr&ascending=false&tag_slug=crypto");
+      const fed=all.filter(e=>/^Fed Decision/i.test(e.title)).sort((a,b)=>(a.endDate||"").localeCompare(b.endDate||""))[0];
+      if(fed){ M.poly.push({q:fed.title,url:"https://polymarket.com/event/"+fed.slug,odds:odds(fed).sort((a,b)=>b[1]-a[1]).slice(0,4)}); M.events.unshift({d:(fed.endDate||"").slice(0,10),t:"US Fed rate decision"}); }
+      for(const [re,label] of [[/^What price will Bitcoin hit in 20\d\d\?/,"Bitcoin touches this price this year"],[/^What price will Ethereum hit in 20\d\d\?/,"Ethereum touches this price this year"]]){
+        const e=cr.find(x=>re.test(x.title)); if(e) M.poly.push({q:label,url:"https://polymarket.com/event/"+e.slug,odds:odds(e).filter(o=>o[1]>=0.01&&o[1]<=0.99).sort((a,b)=>b[1]-a[1]).slice(0,5).map(nice)}); }
+    }catch(e){ console.warn("polymarket",e); }
+    await db.doc("market/today").set(M);
+  }
+  async function extras(){ try{ await holders(); }catch(e){} try{ await market(); }catch(e){} }
+  function stale(){ return S.watch.some(id=>{ const c=S.coins[id]; return !c||Date.now()-new Date(c.updatedAt).getTime()>30*60e3; }); }
+  setTimeout(async()=>{ if(stale()) await refreshLive(); startAuto(); extras(); setInterval(extras,60*60e3); },400);
+  // Backup and restore
+  const bar=document.createElement("div"); bar.className="small muted"; bar.style.cssText="display:flex;gap:10px;flex-wrap:wrap;align-items:center";
+  const sv=window.__deskServer, ag=sv?Math.round((Date.now()-new Date(sv.at))/60e3):null;
+  bar.innerHTML=`<span>${sv?`Paper bot runs on GitHub every 30 min. Last bot run: ${ag<90?ag+" min":Math.round(ag/60)+" h"} ago${sv.status?.errors?.length?" (with warnings)":""}. To change the bot's coins, edit data/watchlist.json in the repo. Your own trade log is saved in this browser.`:"Could not load the bot's results from GitHub, so this is browser-only data."}</span><button id="bk">Back up data</button><label style="display:inline-flex;gap:6px;align-items:center;cursor:pointer"><span class="linkbtn">Restore from backup</span><input id="rs" type="file" accept="application/json" hidden></label>`;
+  document.querySelector(".foot").before(bar);
+  document.getElementById("bk").onclick=()=>{ const b=new Blob([JSON.stringify(store)],{type:"application/json"}); const a=document.createElement("a"); a.href=URL.createObjectURL(b); a.download="crypto-desk-backup-"+todayKey()+".json"; a.click(); };
+  document.getElementById("rs").onchange=async e=>{ const f=e.target.files[0]; if(!f) return; try{ const d=JSON.parse(await f.text()); Object.keys(store).forEach(k=>delete store[k]); Object.assign(store,d); window.__desk.notify(); S.msg="Backup restored."; render(); }catch(err){ S.err="That file is not a Crypto Desk backup."; render(); } };
+})();
+
+</script>
+</body></html>

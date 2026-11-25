@@ -1,0 +1,42 @@
+name: Paper bot
+
+on:
+  schedule:
+    - cron: "7,37 * * * *"   # every 30 minutes (GitHub can start scheduled runs a few minutes late)
+  workflow_dispatch:          # "Run workflow" button on the Actions tab
+    inputs:
+      force_daily:
+        description: "Refresh all charts now (1 = yes)"
+        required: false
+        default: "0"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: paper-bot
+  cancel-in-progress: false
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Run the paper bot
+        env:
+          COINGECKO_API_KEY: ${{ secrets.COINGECKO_API_KEY }}
+          FORCE_DAILY: ${{ github.event.inputs.force_daily }}
+        run: node bot/bot.js
+      - name: Save results to the repo
+        run: |
+          git config user.name "paper-bot"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data
+          if git diff --cached --quiet; then echo "nothing changed"; exit 0; fi
+          git commit -m "bot: $(date -u +%Y-%m-%dT%H:%MZ)" -q
+          for i in 1 2 3 4; do git pull --rebase -q -X theirs origin "${GITHUB_REF_NAME}" && git push -q && exit 0; sleep $((i*5)); done
+          exit 1

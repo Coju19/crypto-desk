@@ -1,0 +1,21 @@
+{
+ "ids": [
+  "bitcoin",
+  "ethereum",
+  "aave",
+  "solana",
+  "avalanche-2",
+  "uniswap",
+  "dogecoin",
+  "compound-governance-token",
+  "chainlink",
+  "sui",
+  "aptos",
+  "optimism",
+  "polkadot",
+  "cardano",
+  "ethena",
+  "zcash",
+  "ripple"
+ ]
+}

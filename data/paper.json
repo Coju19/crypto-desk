@@ -1,0 +1,147 @@
+{
+ "budget": 100,
+ "cash": 80.91433705688696,
+ "equity": [
+  {
+   "d": "2026-11-23",
+   "v": 100
+  },
+  {
+   "d": "2026-11-24",
+   "v": 99.9052
+  }
+ ],
+ "funding": 0,
+ "lastDate": "2026-11-24",
+ "liqs": 0,
+ "live": {
+  "at": "2026-11-25T07:20:53.000Z",
+  "v": 102.4841
+ },
+ "pos": {
+  "chainlink": {
+   "cost": 7.027427617876157,
+   "date": "2026-11-24",
+   "dir": -1,
+   "entry": 9.008,
+   "last": 8.74,
+   "lev": 5,
+   "liq": 10.584399999999999,
+   "margin": 6.9924652914190615,
+   "openFee": 0.03496232645709531,
+   "qty": 3.881252937066531,
+   "rules": [
+    "t200",
+    "x2050",
+    "p50"
+   ],
+   "stop": 9.522989256949158,
+   "target": 7.9780214861016825,
+   "type": "short"
+  },
+  "compound-governance-token": {
+   "cost": 8.038405697967546,
+   "date": "2026-11-24",
+   "dir": -1,
+   "entry": 17.5,
+   "last": 17.28,
+   "lev": 5,
+   "liq": 20.5625,
+   "margin": 7.998413629818454,
+   "openFee": 0.03999206814909227,
+   "qty": 2.285261037090987,
+   "rules": [
+    "t200",
+    "x2050",
+    "p50"
+   ],
+   "stop": 18.375,
+   "target": 15.75,
+   "type": "short"
+  },
+  "uniswap": {
+   "cost": 4.019829627269326,
+   "date": "2026-11-24",
+   "dir": -1,
+   "entry": 4.843,
+   "last": 4.59,
+   "lev": 4.957406817331485,
+   "liq": 5.698847043813005,
+   "margin": 4,
+   "openFee": 0.01982962726932594,
+   "qty": 4.094492518960549,
+   "rules": [
+    "t200",
+    "x2050",
+    "p50"
+   ],
+   "stop": 5.331461021906502,
+   "target": 3.8660779561869947,
+   "type": "short"
+  }
+ },
+ "startDate": "2026-11-23",
+ "trades": [
+  {
+   "coin": "uniswap",
+   "date": "2026-11-24",
+   "fee": 0.01982962726932594,
+   "lev": 4.957406817331485,
+   "liqPrice": 5.698847043813005,
+   "margin": 4,
+   "price": 4.843,
+   "rules": [
+    "t200",
+    "x2050",
+    "p50"
+   ],
+   "side": "open",
+   "stop": 5.331461021906502,
+   "target": 3.8660779561869947,
+   "type": "short",
+   "usd": 19.82962726932594,
+   "why": "Strong sell (score -3, RSI 35), so a short at 5.0\u00d7 that gains if the price keeps falling. $4.00 of margin controls $19.83. Stop $5.33, target $3.87, liquidation $5.70. Rules against: Long-term trend (price vs 200-day avg), Medium trend (20 vs 50-day avg), Price vs 50-day avg."
+  },
+  {
+   "coin": "compound-governance-token",
+   "date": "2026-11-24",
+   "fee": 0.03999206814909227,
+   "lev": 5,
+   "liqPrice": 20.5625,
+   "margin": 7.998413629818454,
+   "price": 17.5,
+   "rules": [
+    "t200",
+    "x2050",
+    "p50"
+   ],
+   "side": "open",
+   "stop": 18.375,
+   "target": 15.75,
+   "type": "short",
+   "usd": 39.99206814909227,
+   "why": "Strong sell (score -3, RSI 35), so a short at 5.0\u00d7 that gains if the price keeps falling. $8.00 of margin controls $39.99. Stop $18.38, target $15.75, liquidation $20.56. Rules against: Long-term trend (price vs 200-day avg), Medium trend (20 vs 50-day avg), Price vs 50-day avg."
+  },
+  {
+   "coin": "chainlink",
+   "date": "2026-11-24",
+   "fee": 0.03496232645709531,
+   "lev": 5,
+   "liqPrice": 10.584399999999999,
+   "margin": 6.9924652914190615,
+   "price": 9.008,
+   "rules": [
+    "t200",
+    "x2050",
+    "p50"
+   ],
+   "side": "open",
+   "stop": 9.522989256949158,
+   "target": 7.9780214861016825,
+   "type": "short",
+   "usd": 34.96232645709531,
+   "why": "Strong sell (score -3, RSI 37), so a short at 5.0\u00d7 that gains if the price keeps falling. $6.99 of margin controls $34.96. Stop $9.52, target $7.98, liquidation $10.58. Rules against: Long-term trend (price vs 200-day avg), Medium trend (20 vs 50-day avg), Price vs 50-day avg."
+  }
+ ],
+ "updatedAt": "2026-11-25T07:27:53.441Z"
+}
