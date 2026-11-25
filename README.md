@@ -6,8 +6,8 @@ The signals are automated indicators, not financial advice.
 
 ## How it works
 
-- **The bot** (`bot/bot.js`) runs on GitHub Actions every 30 minutes, for free, without any computer of yours being on.
-  - Every run it fetches live prices from CoinGecko and does a **live check**: an open position that hit its stop-loss, target or liquidation price is closed.
+- **The bot** (`bot/bot.js`) runs on GitHub Actions every 5 minutes, for free, without any computer of yours being on.
+  - Every run it fetches live prices from CoinGecko and does a **live check**: an open position that hit its stop-loss, target or liquidation price is closed. It only saves (commits) when something happened, or every ~30 minutes to keep the page's numbers fresh, so the repo and the page don't churn every 5 minutes.
   - Once a day, after the daily close (00:00 UTC, so the first run after 01:00 Berlin time), it reloads the 1-year daily charts and processes the finished day. **This is the only time new trades open**: a spot buy, a leveraged long or a short (max 5×), picked by the same rules as the page.
   - It saves everything in `data/` and commits it to this repo, so the history of every run is in the commit log.
 - **History:** CoinGecko's free API only gives 365 days, so the bot also keeps each coin's full daily history from Binance's public market data (USDT pairs, back to 2017 or the coin's listing) in `data/history/`. The Strategy lab backtest runs over all of it once a day on GitHub and saves the result in `data/lab.json`, so your phone doesn't have to crunch years of data. Signals and the 30-day simulation still use the most recent year on purpose: they should react to today's market, not 2018's.
@@ -45,5 +45,5 @@ The signals are automated indicators, not financial advice.
 
 - GitHub can start scheduled runs a few minutes late, sometimes more at busy times.
 - GitHub pauses schedules in a repo with no activity for 60 days. The bot's own commits normally count as activity; if you ever see a "workflow disabled" banner on the Actions tab, press *Enable*.
-- Fees, funding and liquidation are estimates (0.1% per side, 0.03%/day funding, 2.5% maintenance margin). Daily closes miss intraday wicks; the 30-minute live check catches most of them.
+- Fees, funding and liquidation are estimates (0.1% per side, 0.03%/day funding, 2.5% maintenance margin). Daily closes miss intraday wicks; the 5-minute live check catches most of them.
 - Carried over from the Claude version on 2026-11-25: started 2026-11-23 with $100; 3 shorts at 5× opened on 2026-11-24 (UNI 4.843, COMP 17.50, LINK 9.008).

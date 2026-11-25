@@ -143,6 +143,13 @@ function longSeries(c, h) {
   const closed = E.liveCheck(st, prices, now);
   st.updatedAt = now;
 
+  // only save (= commit, = page rebuild) when something happened, or every ~30 minutes to keep the page's numbers fresh
+  let prev = null; try { prev = rd("status.json"); } catch {}
+  const heartbeat = !prev || Date.now() - new Date(prev.lastRun).getTime() > 28 * 60e3;
+  if (!(closed.length || newTrades.length || dailyRan || needDaily || histMissing || errors.length || heartbeat || process.env.FORCE_DAILY === "1")) {
+    console.log(JSON.stringify({ at: now, saved: false, equity: st.live.v, open: Object.keys(st.pos) })); return;
+  }
+
   // 4. write everything
   for (const id of S.watch) if (S.coins[id]) wr(`coins/${id}.json`, S.coins[id]);
   wr("paper.json", st, true);

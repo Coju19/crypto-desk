@@ -771,7 +771,7 @@ function renderStrip(B){
     <div><span class="label">Profit / loss</span><span class="v ${pl>=0?"up":"down"}">${pl>=0?"+":""}${usd(pl,2)}</span><span class="small muted">fake money</span></div>
     <div><span class="label">Cash</span><span class="v">${usd(P.cash,2)}</span><span class="small muted">not in trades</span></div>
     <div><span class="label">Open trades</span><span class="v">${Object.keys(P.pos||{}).length}</span><span class="small muted">${esc(Object.keys(P.pos||{}).map(id=>(S.coins[id]?.symbol||id).toUpperCase()).join(", ")||"none")}</span></div>
-    <div><span class="label">Closed trades</span><span class="v">${cl.length}</span><span class="small muted">${w} won · bot checked ${ago(P.live?.at||P.updatedAt)}</span></div>`; return; }
+    <div><span class="label">Closed trades</span><span class="v">${cl.length}</span><span class="small muted">${w} won · bot saved ${ago(P.live?.at||P.updatedAt)}</span></div>`; return; }
   $("strip").innerHTML=`
     <div><span class="label">Portfolio value</span><span class="v">${usd(B.total,2)}</span><span class="small">${pct(B.pnlPct,2)} <span class="muted">since start</span></span></div>
     <div><span class="label">Profit / loss</span><span class="v ${B.pnl>=0?"up":"down"}">${B.pnl>=0?"+":""}${usd(B.pnl,2)}</span><span class="small muted">realized ${usd(B.realized,2)}</span></div>
@@ -1051,7 +1051,7 @@ render();
   // Backup and restore
   const bar=document.createElement("div"); bar.className="small muted"; bar.style.cssText="display:flex;gap:10px;flex-wrap:wrap;align-items:center";
   const sv=window.__deskServer, ag=sv?Math.round((Date.now()-new Date(sv.at))/60e3):null;
-  bar.innerHTML=`<span>${sv?`Paper bot runs on GitHub every 30 min. Last bot run: ${ag<90?ag+" min":Math.round(ag/60)+" h"} ago${sv.status?.errors?.length?" (with warnings)":""}. To change the bot's coins, edit data/watchlist.json in the repo. Your own trade log is saved in this browser.`:"Could not load the bot's results from GitHub, so this is browser-only data."}</span><button id="bk">Back up data</button><label style="display:inline-flex;gap:6px;align-items:center;cursor:pointer"><span class="linkbtn">Restore from backup</span><input id="rs" type="file" accept="application/json" hidden></label>`;
+  bar.innerHTML=`<span>${sv?`Paper bot checks prices on GitHub every 5 min. Last bot run: ${ag<90?ag+" min":Math.round(ag/60)+" h"} ago${sv.status?.errors?.length?" (with warnings)":""}. To change the bot's coins, edit data/watchlist.json in the repo. Your own trade log is saved in this browser.`:"Could not load the bot's results from GitHub, so this is browser-only data."}</span><button id="bk">Back up data</button><label style="display:inline-flex;gap:6px;align-items:center;cursor:pointer"><span class="linkbtn">Restore from backup</span><input id="rs" type="file" accept="application/json" hidden></label>`;
   document.querySelector(".foot").before(bar);
   document.getElementById("bk").onclick=()=>{ const b=new Blob([JSON.stringify(store)],{type:"application/json"}); const a=document.createElement("a"); a.href=URL.createObjectURL(b); a.download="crypto-desk-backup-"+todayKey()+".json"; a.click(); };
   document.getElementById("rs").onchange=async e=>{ const f=e.target.files[0]; if(!f) return; try{ const d=JSON.parse(await f.text()); Object.keys(store).forEach(k=>delete store[k]); Object.assign(store,d); window.__desk.notify(); S.msg="Backup restored."; render(); }catch(err){ S.err="That file is not a Crypto Desk backup."; render(); } };
