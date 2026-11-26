@@ -19,8 +19,8 @@
  "lastDate": "2026-11-25",
  "liqs": 0,
  "live": {
-  "at": "2026-11-26T00:00:54.227Z",
-  "v": 99.1635
+  "at": "2026-11-26T00:05:59.100Z",
+  "v": 99.0609
  },
  "pos": {
   "chainlink": {
@@ -28,7 +28,7 @@
    "date": "2026-11-24",
    "dir": -1,
    "entry": 9.008,
-   "last": 9.05,
+   "last": 9.06,
    "lev": 5,
    "liq": 10.584399999999999,
    "margin": 7.002760493372265,
@@ -48,7 +48,7 @@
    "date": "2026-11-24",
    "dir": -1,
    "entry": 17.5,
-   "last": 17.95,
+   "last": 17.96,
    "lev": 5,
    "liq": 20.5625,
    "margin": 8.010270843825062,
@@ -68,7 +68,7 @@
    "date": "2026-11-24",
    "dir": -1,
    "entry": 4.843,
-   "last": 4.74,
+   "last": 4.75,
    "lev": 4.957406817331485,
    "liq": 5.698847043813005,
    "margin": 4.0057924089602,
@@ -147,5 +147,5 @@
    "why": "Strong sell (score -3, RSI 37), so a short at 5.0× that gains if the price keeps falling. $6.99 of margin controls $34.96. Stop $9.52, target $7.98, liquidation $10.58. Rules against: Long-term trend (price vs 200-day avg), Medium trend (20 vs 50-day avg), Price vs 50-day avg."
   }
  ],
- "updatedAt": "2026-11-26T00:00:54.227Z"
+ "updatedAt": "2026-11-26T00:05:59.100Z"
 }
