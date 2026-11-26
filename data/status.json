@@ -1,8 +1,8 @@
 {
- "lastRun": "2026-11-26T00:05:59.100Z",
- "dailyRan": true,
+ "lastRun": "2026-11-26T00:35:23.237Z",
+ "dailyRan": false,
  "lastDate": "2026-11-25",
- "equity": 99.0609,
+ "equity": 98.828,
  "cash": 80.9143,
  "open": [
   "chainlink",
