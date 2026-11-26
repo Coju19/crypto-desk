@@ -9,14 +9,18 @@
   {
    "d": "2026-11-24",
    "v": 99.9052
+  },
+  {
+   "d": "2026-11-25",
+   "v": 101.5678
   }
  ],
- "funding": 0,
- "lastDate": "2026-11-24",
+ "funding": -0.027944824920013555,
+ "lastDate": "2026-11-25",
  "liqs": 0,
  "live": {
-  "at": "2026-11-25T23:30:41.167Z",
-  "v": 99.4551
+  "at": "2026-11-26T00:00:54.227Z",
+  "v": 99.1635
  },
  "pos": {
   "chainlink": {
@@ -24,10 +28,10 @@
    "date": "2026-11-24",
    "dir": -1,
    "entry": 9.008,
-   "last": 9.03,
+   "last": 9.05,
    "lev": 5,
    "liq": 10.584399999999999,
-   "margin": 6.9924652914190615,
+   "margin": 7.002760493372265,
    "openFee": 0.03496232645709531,
    "qty": 3.881252937066531,
    "rules": [
@@ -44,10 +48,10 @@
    "date": "2026-11-24",
    "dir": -1,
    "entry": 17.5,
-   "last": 17.88,
+   "last": 17.95,
    "lev": 5,
    "liq": 20.5625,
-   "margin": 7.998413629818454,
+   "margin": 8.010270843825062,
    "openFee": 0.03999206814909227,
    "qty": 2.285261037090987,
    "rules": [
@@ -64,10 +68,10 @@
    "date": "2026-11-24",
    "dir": -1,
    "entry": 4.843,
-   "last": 4.72,
+   "last": 4.74,
    "lev": 4.957406817331485,
    "liq": 5.698847043813005,
-   "margin": 4,
+   "margin": 4.0057924089602,
    "openFee": 0.01982962726932594,
    "qty": 4.094492518960549,
    "rules": [
@@ -143,5 +147,5 @@
    "why": "Strong sell (score -3, RSI 37), so a short at 5.0× that gains if the price keeps falling. $6.99 of margin controls $34.96. Stop $9.52, target $7.98, liquidation $10.58. Rules against: Long-term trend (price vs 200-day avg), Medium trend (20 vs 50-day avg), Price vs 50-day avg."
   }
  ],
- "updatedAt": "2026-11-25T23:30:41.167Z"
+ "updatedAt": "2026-11-26T00:00:54.227Z"
 }
