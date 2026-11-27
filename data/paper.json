@@ -1,6 +1,6 @@
 {
  "budget": 100,
- "cash": 80.91433705688696,
+ "cash": 85.86462709619009,
  "equity": [
   {
    "d": "2026-11-23",
@@ -23,36 +23,16 @@
  "lastDate": "2026-11-26",
  "liqs": 0,
  "live": {
-  "at": "2026-11-27T02:05:21.794Z",
-  "v": 98.1799
+  "at": "2026-11-27T02:35:26.404Z",
+  "v": 96.3533
  },
  "pos": {
-  "chainlink": {
-   "cost": 7.027427617876157,
-   "date": "2026-11-24",
-   "dir": -1,
-   "entry": 9.008,
-   "last": 9.34,
-   "lev": 5,
-   "liq": 10.584399999999999,
-   "margin": 7.013292412942101,
-   "openFee": 0.03496232645709531,
-   "qty": 3.881252937066531,
-   "rules": [
-    "t200",
-    "x2050",
-    "p50"
-   ],
-   "stop": 9.522989256949158,
-   "target": 7.9780214861016825,
-   "type": "short"
-  },
   "compound-governance-token": {
    "cost": 8.038405697967546,
    "date": "2026-11-24",
    "dir": -1,
    "entry": 17.5,
-   "last": 17.99,
+   "last": 18.11,
    "lev": 5,
    "liq": 20.5625,
    "margin": 8.02257779720377,
@@ -72,7 +52,7 @@
    "date": "2026-11-24",
    "dir": -1,
    "entry": 4.843,
-   "last": 4.69,
+   "last": 4.88,
    "lev": 4.957406817331485,
    "liq": 5.698847043813005,
    "margin": 4.0116160302368735,
@@ -149,7 +129,27 @@
    "type": "short",
    "usd": 34.96232645709531,
    "why": "Strong sell (score -3, RSI 37), so a short at 5.0× that gains if the price keeps falling. $6.99 of margin controls $34.96. Stop $9.52, target $7.98, liquidation $10.58. Rules against: Long-term trend (price vs 200-day avg), Medium trend (20 vs 50-day avg), Price vs 50-day avg."
+  },
+  {
+   "date": "2026-11-27",
+   "coin": "chainlink",
+   "type": "short",
+   "side": "close",
+   "lev": 5,
+   "price": 9.53,
+   "usd": 36.988340490244035,
+   "fee": 0.036988340490244034,
+   "pnl": -2.07713757857303,
+   "liq": false,
+   "days": 3,
+   "why": "Stop-loss hit: price $9.53 (live check 02:35 UTC)",
+   "rules": [
+    "t200",
+    "x2050",
+    "p50"
+   ],
+   "live": true
   }
  ],
- "updatedAt": "2026-11-27T02:05:21.794Z"
+ "updatedAt": "2026-11-27T02:35:26.404Z"
 }

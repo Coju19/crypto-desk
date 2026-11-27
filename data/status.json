@@ -1,11 +1,10 @@
 {
- "lastRun": "2026-11-27T02:05:21.794Z",
+ "lastRun": "2026-11-27T02:35:26.404Z",
  "dailyRan": false,
  "lastDate": "2026-11-26",
- "equity": 98.1799,
- "cash": 80.9143,
+ "equity": 96.3533,
+ "cash": 85.8646,
  "open": [
-  "chainlink",
   "compound-governance-token",
   "uniswap"
  ],
@@ -15,6 +14,13 @@
    "at": "2026-11-25T07:27:53.441Z",
    "events": [
     "Moved from the Claude version: 3 open 5x shorts (LINK, UNI, COMP)"
+   ],
+   "errors": []
+  },
+  {
+   "at": "2026-11-27T02:35:26.404Z",
+   "events": [
+    "2026-11-27 close short chainlink @ 9.53 P/L -2.08"
    ],
    "errors": []
   }
